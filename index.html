@@ -59,6 +59,71 @@
   .profile-tag { font-size: 0.95rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
   .profile-desc { font-size: 1rem; color: var(--muted); max-width: 320px; line-height: 1.6; }
 
+  /* ═══════════ CYBER CLOCK ═══════════ */
+  .cyber-clock {
+    position: relative;
+    width: 100%; max-width: 400px;
+    margin-bottom: 1.75rem;
+    background: linear-gradient(160deg, rgba(124,58,237,0.1), rgba(6,182,212,0.08));
+    border: 1px solid rgba(124,58,237,0.35);
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset, 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .cyber-clock::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+  .cyber-clock::after {
+    content: '';
+    position: absolute; top: 0; left: -40%;
+    width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: clockSheen 5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes clockSheen { 0% { left: -40%; } 50% { left: 110%; } 100% { left: 110%; } }
+  .clock-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; position: relative; z-index: 1; }
+  .clock-loc { display: flex; align-items: center; gap: 6px; font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--c2); font-weight: 700; }
+  .clock-loc .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: dotPulse 1.5s ease-in-out infinite; }
+  @keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .clock-tz { font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; }
+
+  .clock-digits {
+    display: flex; align-items: baseline; justify-content: center;
+    gap: 2px; position: relative; z-index: 1;
+    font-family: 'Orbitron', monospace; font-weight: 900;
+  }
+  .clock-digits .seg {
+    font-size: 2.5rem; line-height: 1;
+    background: linear-gradient(180deg, #fff 0%, var(--c2) 60%, var(--c1) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-shadow: 0 0 18px rgba(124,58,237,0.55);
+    letter-spacing: 1px;
+    min-width: 1.55ch;
+    text-align: center;
+  }
+  .clock-digits .colon {
+    font-size: 2.2rem; color: var(--c2);
+    animation: colonBlink 1s steps(1) infinite;
+    text-shadow: 0 0 12px var(--c2);
+  }
+  @keyframes colonBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.15; } }
+  .clock-digits .sec {
+    font-size: 1.2rem; opacity: 0.8; margin-left: 4px;
+    align-self: flex-end; margin-bottom: 4px;
+  }
+
+  .clock-bottom-row { display: flex; align-items: center; justify-content: space-between; margin-top: 0.65rem; position: relative; z-index: 1; }
+  .clock-date { font-size: 0.78rem; color: var(--muted); letter-spacing: 1px; }
+  .clock-date strong { color: var(--text); font-weight: 600; }
+  .clock-period { font-size: 0.68rem; font-weight: 700; letter-spacing: 2px; padding: 2px 9px; border-radius: 99px; background: rgba(124,58,237,0.18); border: 1px solid rgba(124,58,237,0.4); color: #a78bfa; }
+
   /* MUSIC PLAYER */
   .music-bar { display: flex; align-items: center; gap: 0.75rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 99px; padding: 0.5rem 1rem; width: 100%; max-width: 400px; margin-bottom: 2rem; backdrop-filter: blur(12px); }
   .music-btn { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s; }
@@ -196,6 +261,25 @@
     <div class="profile-name">HieJi Gaming</div>
     <div class="profile-tag">🎮 Gaming Creator</div>
     <div class="profile-desc">Game thủ — Content creator — Review game &amp; app chất lượng cao</div>
+  </div>
+
+  <!-- CYBER CLOCK: giờ Việt Nam -->
+  <div class="cyber-clock">
+    <div class="clock-top-row">
+      <div class="clock-loc"><span class="dot-live"></span> VIỆT NAM &bull; HÀ NỘI</div>
+      <div class="clock-tz">GMT+7</div>
+    </div>
+    <div class="clock-digits" id="clockDigits">
+      <span class="seg" id="clockH">--</span>
+      <span class="colon">:</span>
+      <span class="seg" id="clockM">--</span>
+      <span class="colon">:</span>
+      <span class="seg" id="clockS">--</span>
+    </div>
+    <div class="clock-bottom-row">
+      <div class="clock-date" id="clockDate">-- -- ----</div>
+      <div class="clock-period" id="clockPeriod">--</div>
+    </div>
   </div>
 
   <!-- MUSIC PLAYER -->
@@ -563,9 +647,51 @@ function spawnParticles() {
   }
 }
 
+// ── CYBER CLOCK: giờ Việt Nam (Asia/Ho_Chi_Minh, GMT+7) ──
+function updateCyberClock() {
+  const now = new Date();
+  // Lấy các thành phần giờ theo timezone Việt Nam, không phụ thuộc múi giờ máy người dùng
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false,
+    weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'
+  }).formatToParts(now);
+
+  const map = {};
+  parts.forEach(p => map[p.type] = p.value);
+
+  let hh = map.hour === '24' ? '00' : map.hour;
+  const mm = map.minute;
+  const ss = map.second;
+
+  const hEl = document.getElementById('clockH');
+  const mEl = document.getElementById('clockM');
+  const sEl = document.getElementById('clockS');
+  const dateEl = document.getElementById('clockDate');
+  const periodEl = document.getElementById('clockPeriod');
+  if (!hEl) return;
+
+  hEl.textContent = hh;
+  mEl.textContent = mm;
+  sEl.textContent = ss;
+
+  const weekdayMap = { Mon: 'Thứ Hai', Tue: 'Thứ Ba', Wed: 'Thứ Tư', Thu: 'Thứ Năm', Fri: 'Thứ Sáu', Sat: 'Thứ Bảy', Sun: 'Chủ Nhật' };
+  const wd = weekdayMap[map.weekday] || map.weekday;
+  dateEl.innerHTML = `<strong>${wd}</strong> &bull; ${map.day}/${map.month}/${map.year}`;
+
+  const h24 = parseInt(hh, 10);
+  periodEl.textContent = h24 < 12 ? 'SÁNG' : (h24 < 18 ? 'CHIỀU' : 'TỐI');
+}
+
 // ── INIT ──
+let siteData = null;
+
 window.addEventListener('DOMContentLoaded', async () => {
   spawnParticles();
+  updateCyberClock();
+  setInterval(updateCyberClock, 1000);
+
   const data = await loadFromSupabase();
   renderAll(data);
   subscribeRealtime();
