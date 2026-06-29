@@ -448,7 +448,10 @@
       <span></span><span></span><span></span><span></span><span></span>
     </div>
   </div>
-  <audio id="audio-el" loop></audio>
+  <!-- YouTube IFrame Player (ẩn) -->
+  <div id="yt-player-wrap" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;">
+    <div id="yt-player"></div>
+  </div>
 
   <!-- STATS -->
   <div class="section-label" style="width:100%;max-width:400px">📊 Thống kê</div>
@@ -485,7 +488,7 @@
 <script>
 // ── DATA (shared with admin via localStorage) ──
 const DEFAULT_DATA = {
-  music: { url: 'https://link-nhac.mp3', title: 'Tên bài', source: 'Nguồn' },
+  music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
     { label: 'Subscribers', value: '10K' },
@@ -560,29 +563,76 @@ function renderAll() {
 
   const m = data.music;
   document.getElementById('musicTitle').textContent = m.title || 'Chưa có nhạc';
-  document.getElementById('musicSource').textContent = m.source || (m.url ? 'Nhạc nền' : '—');
-  const audio = document.getElementById('audio-el');
-  if (m.url && audio.src !== m.url) { audio.src = m.url; }
+  document.getElementById('musicSource').textContent = m.source || (m.url ? 'YouTube' : '—');
+  const videoId = getYouTubeID(m.url);
+  if (videoId && ytReady && (!ytPlayer || ytPlayer.getVideoData?.()?.video_id !== videoId)) {
+    initPlayer(videoId);
+  }
 }
 
-// ── MUSIC ──
+// ── MUSIC (YouTube IFrame API) ──
+let ytPlayer = null;
 let playing = false;
+let ytReady = false;
+let pendingPlay = false;
+
+function getYouTubeID(url) {
+  if (!url) return null;
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+// Load YouTube API
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+window.onYouTubeIframeAPIReady = function() {
+  ytReady = true;
+  const data = loadData();
+  const videoId = getYouTubeID(data.music.url);
+  if (videoId) initPlayer(videoId);
+};
+
+function initPlayer(videoId) {
+  if (ytPlayer) { ytPlayer.destroy(); ytPlayer = null; }
+  ytPlayer = new YT.Player('yt-player', {
+    height: '1', width: '1',
+    videoId: videoId,
+    playerVars: { autoplay: 0, loop: 1, playlist: videoId },
+    events: {
+      onStateChange: function(e) {
+        if (e.data === YT.PlayerState.PLAYING) {
+          playing = true;
+          document.getElementById('playIcon').style.display = 'none';
+          document.getElementById('pauseIcon').style.display = '';
+          document.getElementById('musicWave').classList.add('playing');
+        } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+          playing = false;
+          document.getElementById('playIcon').style.display = '';
+          document.getElementById('pauseIcon').style.display = 'none';
+          document.getElementById('musicWave').classList.remove('playing');
+        }
+      }
+    }
+  });
+}
+
 function toggleMusic() {
-  const audio = document.getElementById('audio-el');
-  if (!audio.src || audio.src.endsWith('/')) return;
+  const data = loadData();
+  const videoId = getYouTubeID(data.music.url);
+  if (!videoId) return;
+
+  if (!ytPlayer) {
+    if (ytReady) initPlayer(videoId);
+    pendingPlay = true;
+    return;
+  }
+
   if (playing) {
-    audio.pause();
-    playing = false;
-    document.getElementById('playIcon').style.display = '';
-    document.getElementById('pauseIcon').style.display = 'none';
-    document.getElementById('musicWave').classList.remove('playing');
+    ytPlayer.pauseVideo();
   } else {
-    audio.play().then(() => {
-      playing = true;
-      document.getElementById('playIcon').style.display = 'none';
-      document.getElementById('pauseIcon').style.display = '';
-      document.getElementById('musicWave').classList.add('playing');
-    }).catch(() => {});
+    ytPlayer.playVideo();
   }
 }
 
