@@ -29,7 +29,17 @@
   .intro-bar { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); width: 0%; border-radius: 99px; animation: loadBar 2s ease-out 1.4s forwards; }
   @keyframes loadBar { from { width: 0%; } to { width: 100%; } }
 
-  /* PARTICLES */
+  /* BACKGROUND IMAGE */
+  #site-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-size: cover; background-position: center center;
+    background-repeat: no-repeat; background-attachment: fixed;
+    transition: opacity 0.8s ease;
+  }
+  #site-bg-overlay {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: rgba(7,7,15,0.5); transition: background 0.5s ease;
+  }
   #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--c1); animation: float linear infinite; opacity: 0; }
   @keyframes float { 0% { transform: translateY(100vh) translateX(0); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.4; } 100% { transform: translateY(-20px) translateX(30px); opacity: 0; } }
@@ -131,6 +141,10 @@
   <div class="enter-hint">Bấm để vào trang &amp; bật nhạc</div>
 </div>
 
+<!-- BACKGROUND -->
+<div id="site-bg"></div>
+<div id="site-bg-overlay"></div>
+
 <!-- PARTICLES -->
 <div id="particles"></div>
 <div class="bg-glow"></div>
@@ -202,6 +216,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEFAULT_DATA = {
   profile: { avatarUrl: '' },
+  bg: { url: '', opacity: 50 },
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
@@ -232,6 +247,7 @@ async function loadFromSupabase() {
     data.forEach(row => { result[row.key] = row.value; });
     return {
       profile: result.profile ?? DEFAULT_DATA.profile,
+      bg:      result.bg      ?? DEFAULT_DATA.bg,
       music:   result.music   ?? DEFAULT_DATA.music,
       stats:   result.stats   ?? DEFAULT_DATA.stats,
       games:   result.games   ?? DEFAULT_DATA.games,
@@ -241,6 +257,20 @@ async function loadFromSupabase() {
   } catch (e) {
     console.warn('Supabase load failed, using defaults:', e);
     return DEFAULT_DATA;
+  }
+}
+
+// ── BACKGROUND ──
+function applyBg(bg) {
+  const bgEl      = document.getElementById('site-bg');
+  const overlayEl = document.getElementById('site-bg-overlay');
+  if (bg && bg.url) {
+    bgEl.style.backgroundImage = `url('${bg.url}')`;
+    const opacity = (bg.opacity ?? 50) / 100;
+    overlayEl.style.background = `rgba(7,7,15,${opacity})`;
+  } else {
+    bgEl.style.backgroundImage = 'none';
+    overlayEl.style.background = 'transparent';
   }
 }
 
@@ -308,6 +338,7 @@ function renderStats(stats) {
 
 function renderAll(data) {
   siteData = data;
+  applyBg(data.bg);
   applyAvatar(data.profile?.avatarUrl || '');
   renderStats(data.stats);
   renderLinks('gamesWrap', data.games);
