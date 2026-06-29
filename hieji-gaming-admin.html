@@ -145,6 +145,34 @@
   .spinner { width: 40px; height: 40px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--c1); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* BACKGROUND PREVIEW */
+  .bg-preview-box {
+    width: 100%; height: 160px; border-radius: 12px; overflow: hidden;
+    position: relative; background: #07070f;
+    border: 1px solid var(--border); margin-bottom: 1rem; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .bg-preview-box:hover { border-color: var(--c1); }
+  .bg-preview-box.drag-over { border-color: var(--c2); outline: 2px dashed var(--c2); }
+  .bg-preview-img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .bg-preview-overlay {
+    position: absolute; inset: 0; background: rgba(9,9,15,var(--ov,0.5));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+    transition: background 0.2s;
+  }
+  .bg-preview-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+  .bg-preview-name { font-family: 'Orbitron', monospace; font-size: 1.1rem; font-weight: 900; background: linear-gradient(90deg,var(--c1),var(--c2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .bg-preview-tag { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+  .bg-preview-no-img { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0.5rem; }
+  .bg-preview-no-img span { font-size: 2rem; }
+  .bg-preview-no-img p { font-size: 0.8rem; color: var(--muted); }
+  .opacity-slider-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .opacity-slider-wrap label { min-width: 80px; margin: 0; text-transform: uppercase; font-size: 0.78rem; color: var(--muted); }
+  input[type=range] { flex: 1; accent-color: var(--c1); height: 4px; cursor: pointer; }
+  .opacity-val { font-size: 0.9rem; font-weight: 700; color: var(--c1); min-width: 38px; text-align: right; }
+
   /* HIDDEN FILE INPUT */
   input[type=file] { display: none; }
 </style>
@@ -193,6 +221,7 @@
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('profile',this)">👤 Profile</div>
+    <div class="tab" onclick="switchTab('bg',this)">🖼 Nền</div>
     <div class="tab" onclick="switchTab('music',this)">🎵 Nhạc</div>
     <div class="tab" onclick="switchTab('games',this)">🎮 Game</div>
     <div class="tab" onclick="switchTab('apps',this)">📱 App</div>
@@ -239,6 +268,57 @@
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
           <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('avatarFileInput').click()">📷 Chọn ảnh</button>
           <button class="btn btn-danger" onclick="removeAvatar()">🗑 Xóa ảnh (dùng chữ HJ)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKGROUND -->
+    <div id="panel-bg" class="panel">
+      <div class="panel-title">🖼 Ảnh nền trang bio</div>
+      <div class="card">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Ảnh nền sẽ trải đầy toàn trang bio. Khuyến nghị ảnh ngang (1920×1080 hoặc rộng hơn). Bạn có thể điều chỉnh độ tối để chữ dễ đọc.</p>
+
+        <!-- Live preview giả lập trang bio -->
+        <div class="bg-preview-box" id="bgDropZone"
+             onclick="document.getElementById('bgFileInput').click()"
+             ondragover="bgDragOver(event)" ondragleave="bgDragLeave(event)" ondrop="bgDrop(event)">
+          <img id="bgPreviewImg" class="bg-preview-img" src="" alt="" style="display:none">
+          <div class="bg-preview-overlay" id="bgPreviewOverlay" style="--ov:0.5">
+            <div id="bgPreviewNoImg" class="bg-preview-no-img">
+              <span>🖼</span>
+              <p>Bấm hoặc kéo thả ảnh để xem trước</p>
+            </div>
+            <div id="bgPreviewContent" style="display:none;text-align:center">
+              <div class="bg-preview-label">Gaming Creator</div>
+              <div class="bg-preview-name">HieJi Gaming</div>
+              <div class="bg-preview-tag">🎮 Xem trước trang bio</div>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="bgFileInput" accept="image/*" onchange="handleBgFile(this.files[0])">
+
+        <!-- Opacity slider -->
+        <div class="opacity-slider-wrap">
+          <label>Độ tối</label>
+          <input type="range" id="bgOpacity" min="0" max="90" value="50" step="5" oninput="updateBgOpacity(this.value)">
+          <span class="opacity-val" id="bgOpacityVal">50%</span>
+        </div>
+
+        <!-- Progress -->
+        <div id="bgProgressWrap" style="display:none;margin-bottom:1rem">
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem" id="bgProgressLabel">Đang tải lên...</div>
+          <div class="upload-progress"><div class="upload-progress-bar" id="bgProgressBar"></div></div>
+        </div>
+
+        <!-- URL readonly -->
+        <div class="form-group">
+          <label>URL ảnh nền hiện tại</label>
+          <input type="url" id="bgUrl" placeholder="https://... (tự động điền sau khi upload)" readonly style="cursor:default;opacity:.7" />
+        </div>
+
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
+          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('bgFileInput').click()">🖼 Chọn ảnh nền</button>
+          <button class="btn btn-danger" onclick="removeBg()">🗑 Xóa ảnh nền (dùng nền tối mặc định)</button>
         </div>
       </div>
     </div>
@@ -415,6 +495,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEFAULT_DATA = {
   profile: { avatarUrl: '' },
+  bg: { url: '', opacity: 50 },
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
@@ -540,6 +621,91 @@ function removeAvatar() {
 }
 
 // ══════════════════════════════════════════════
+// BACKGROUND UPLOAD
+// ══════════════════════════════════════════════
+function bgDragOver(e)  { e.preventDefault(); document.getElementById('bgDropZone').classList.add('drag-over'); }
+function bgDragLeave()  { document.getElementById('bgDropZone').classList.remove('drag-over'); }
+function bgDrop(e)      { e.preventDefault(); bgDragLeave(); const f = e.dataTransfer.files[0]; if (f) handleBgFile(f); }
+
+async function handleBgFile(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 10MB.'); return; }
+  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
+
+  // Local preview instantly
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('bgPreviewImg');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.getElementById('bgPreviewNoImg').style.display = 'none';
+    document.getElementById('bgPreviewContent').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+
+  const progressWrap = document.getElementById('bgProgressWrap');
+  const progressLabel = document.getElementById('bgProgressLabel');
+  progressWrap.style.display = 'block';
+  progressLabel.textContent = 'Đang tải lên...';
+  progressLabel.style.color = '';
+
+  try {
+    const url = await uploadImage(file, 'backgrounds', 'bgProgressBar');
+    D.bg.url = url;
+    document.getElementById('bgUrl').value = url;
+    progressLabel.textContent = '✅ Tải lên thành công!';
+    progressLabel.style.color = '#22c55e';
+    markChanged();
+    setTimeout(() => { progressWrap.style.display = 'none'; progressLabel.style.color = ''; }, 2500);
+  } catch (err) {
+    progressLabel.textContent = '❌ Lỗi: ' + err.message;
+    progressLabel.style.color = 'var(--danger)';
+  }
+}
+
+function updateBgOpacity(val) {
+  document.getElementById('bgOpacityVal').textContent = val + '%';
+  document.getElementById('bgPreviewOverlay').style.setProperty('--ov', val / 100);
+  D.bg.opacity = parseInt(val);
+  markChanged();
+}
+
+function removeBg() {
+  D.bg = { url: '', opacity: 50 };
+  document.getElementById('bgUrl').value = '';
+  document.getElementById('bgPreviewImg').style.display = 'none';
+  document.getElementById('bgPreviewImg').src = '';
+  document.getElementById('bgPreviewNoImg').style.display = 'flex';
+  document.getElementById('bgPreviewContent').style.display = 'none';
+  document.getElementById('bgOpacity').value = 50;
+  document.getElementById('bgOpacityVal').textContent = '50%';
+  document.getElementById('bgProgressWrap').style.display = 'none';
+  document.getElementById('bgFileInput').value = '';
+  markChanged();
+}
+
+function renderBgPanel() {
+  const bg = D.bg || { url: '', opacity: 50 };
+  const opacity = bg.opacity ?? 50;
+  document.getElementById('bgUrl').value = bg.url || '';
+  document.getElementById('bgOpacity').value = opacity;
+  document.getElementById('bgOpacityVal').textContent = opacity + '%';
+  document.getElementById('bgPreviewOverlay').style.setProperty('--ov', opacity / 100);
+  const img = document.getElementById('bgPreviewImg');
+  if (bg.url) {
+    img.src = bg.url;
+    img.style.display = 'block';
+    document.getElementById('bgPreviewNoImg').style.display = 'none';
+    document.getElementById('bgPreviewContent').style.display = 'block';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+    document.getElementById('bgPreviewNoImg').style.display = 'flex';
+    document.getElementById('bgPreviewContent').style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════════════
 // THUMBNAIL UPLOAD (game / app / social)
 // ══════════════════════════════════════════════
 const THUMB_DEFAULTS = { g: '🎮', a: '📱', s: '🔗' };
@@ -589,6 +755,7 @@ async function loadData() {
   data.forEach(row => { result[row.key] = row.value; });
   D = {
     profile: result.profile ?? DEFAULT_DATA.profile,
+    bg:      result.bg      ?? DEFAULT_DATA.bg,
     music:   result.music   ?? DEFAULT_DATA.music,
     stats:   result.stats   ?? DEFAULT_DATA.stats,
     games:   result.games   ?? DEFAULT_DATA.games,
@@ -605,6 +772,7 @@ async function saveAll() {
 
   const rows = [
     { key: 'profile', value: D.profile },
+    { key: 'bg',      value: D.bg      },
     { key: 'music',   value: D.music   },
     { key: 'stats',   value: D.stats   },
     { key: 'games',   value: D.games   },
@@ -777,6 +945,7 @@ async function showAdmin() {
 
 function renderAdmin() {
   renderAvatarPanel();
+  renderBgPanel();
   renderItemList('gamesList',  'games');
   renderItemList('appsList',   'apps');
   renderItemList('socialList', 'social');
