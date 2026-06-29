@@ -383,6 +383,97 @@
     text-transform: uppercase;
   }
 
+  /* ── ENTER SCREEN ── */
+  #enter-screen {
+    position: fixed;
+    inset: 0;
+    background: #07070f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #enter-screen.show { opacity: 1; visibility: visible; }
+  #enter-screen.hide { opacity: 0; visibility: hidden; }
+
+  .enter-glow {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+  .enter-logo {
+    width: 90px; height: 90px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -2px;
+    box-shadow: 0 0 40px rgba(124,58,237,0.5);
+    margin-bottom: 1.5rem;
+    position: relative; z-index: 1;
+  }
+  .enter-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 0.4rem;
+    position: relative; z-index: 1;
+  }
+  .enter-sub {
+    font-size: 0.85rem;
+    color: var(--c2);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    position: relative; z-index: 1;
+  }
+  .enter-btn {
+    position: relative; z-index: 1;
+    padding: 0.85rem 2.5rem;
+    border-radius: 99px;
+    border: none;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(124,58,237,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: btnPulse 2s ease-in-out infinite;
+  }
+  .enter-btn:hover { transform: scale(1.06); box-shadow: 0 0 50px rgba(124,58,237,0.7); }
+  @keyframes btnPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(124,58,237,0.4); }
+    50% { box-shadow: 0 0 50px rgba(6,182,212,0.6); }
+  }
+  .enter-hint {
+    position: relative; z-index: 1;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    letter-spacing: 2px;
+  }
+
   /* ── ADMIN BTN ── */
   .admin-fab {
     position: fixed;
@@ -414,6 +505,16 @@
   <div class="intro-bar-wrap">
     <div class="intro-bar"></div>
   </div>
+</div>
+
+<!-- ENTER SCREEN -->
+<div id="enter-screen">
+  <div class="enter-glow"></div>
+  <div class="enter-logo">HJ</div>
+  <div class="enter-name">HIEJI GAMING</div>
+  <div class="enter-sub">Gaming &bull; Content</div>
+  <button class="enter-btn" onclick="enterSite()">▶ ENTER</button>
+  <div class="enter-hint">Bấm để vào trang & bật nhạc</div>
 </div>
 
 <!-- PARTICLES -->
@@ -656,13 +757,30 @@ function spawnParticles() {
 window.addEventListener('DOMContentLoaded', () => {
   spawnParticles();
   renderAll();
+  // Sau loading xong → hiện enter screen
   setTimeout(() => {
     document.getElementById('intro').classList.add('hidden');
-    document.getElementById('main').classList.add('visible');
+    document.getElementById('enter-screen').classList.add('show');
   }, 3600);
-  // Listen for storage changes from admin
   window.addEventListener('storage', renderAll);
 });
+
+function enterSite() {
+  document.getElementById('enter-screen').classList.remove('show');
+  document.getElementById('enter-screen').classList.add('hide');
+  document.getElementById('main').classList.add('visible');
+  // Tự động phát nhạc
+  const data = loadData();
+  const videoId = getYouTubeID(data.music.url);
+  if (videoId) {
+    if (ytPlayer) {
+      ytPlayer.playVideo();
+    } else if (ytReady) {
+      initPlayer(videoId);
+      setTimeout(() => { if (ytPlayer) ytPlayer.playVideo(); }, 1000);
+    }
+  }
+}
 </script>
 </body>
 </html>
