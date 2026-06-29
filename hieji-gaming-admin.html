@@ -3,1118 +3,855 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HieJi Gaming — Admin</title>
+<title>HieJi Music — Focus Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --c1: #7c3aed; --c2: #06b6d4;
-    --bg: #09090f; --surface: #111118;
-    --card: #17171f; --border: rgba(255,255,255,0.08);
-    --text: #f1f5f9; --muted: #64748b; --danger: #ef4444;
-  }
-  body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --c1: #7c3aed; --c2: #06b6d4; --c3: #f0abfc;
+  --bg: #07070f; --card: rgba(255,255,255,0.04);
+  --border: rgba(124,58,237,0.3); --text: #f1f5f9; --muted: #94a3b8;
+}
+body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-  /* LOGIN */
-  #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; padding: 2rem; }
-  .login-logo { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; }
-  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; }
-  .login-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
-  .form-group { margin-bottom: 1rem; }
-  label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 1px; text-transform: uppercase; }
-  input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], select {
-    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-    border-radius: 8px; padding: 0.6rem 0.9rem; color: var(--text); font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem; outline: none; transition: border-color 0.2s;
-  }
-  input:focus, select:focus { border-color: var(--c1); }
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-    padding: 0.6rem 1.2rem; border-radius: 8px; font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s;
-  }
-  .btn:active { transform: scale(0.97); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary { background: linear-gradient(135deg, var(--c1), #9333ea); color: #fff; width: 100%; }
-  .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-  .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); }
-  .btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
-  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
-  .err-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+/* PARTICLES */
+#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--c1); animation: float linear infinite; opacity: 0; }
+@keyframes float { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.3; } 100% { transform: translateY(-20px); opacity: 0; } }
 
-  /* ADMIN SHELL */
-  #adminShell { display: none; min-height: 100vh; flex-direction: column; }
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
-  .topbar-logo { font-family: 'Orbitron', monospace; font-size: 0.9rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
-  .topbar-badge { font-size: 0.7rem; background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); border-radius: 99px; padding: 2px 8px; font-weight: 600; letter-spacing: 1px; }
-  .topbar-user { font-size: 0.8rem; color: var(--muted); }
-  .topbar-actions { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  .save-status { font-size: 0.8rem; color: var(--muted); }
-  .save-status.saved { color: #22c55e; }
-  .save-status.error { color: var(--danger); }
+.bg-glow { position: fixed; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%); top: -200px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 0; }
 
-  /* TABS */
-  .tabs { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; overflow-x: auto; }
-  .tab { padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; user-select: none; }
-  .tab.active { color: var(--c1); border-color: var(--c1); }
+/* LAYOUT */
+#app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 1.5rem 1.2rem 4rem; }
 
-  /* CONTENT */
-  .content { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .panel-title { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; }
+/* BACK */
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); text-decoration: none; letter-spacing: 1px; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-btn:hover { color: var(--c2); }
+.back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-  /* CARD */
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .card-header h3 { font-size: 1rem; font-weight: 600; }
+/* PAGE HEADER */
+.page-header { text-align: center; margin-bottom: 2rem; }
+.page-title { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
+.page-sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; text-transform: uppercase; }
 
-  /* ITEM LIST */
-  .item-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-  .item-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; }
-  .item-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-  .item-icon { font-size: 1.4rem; flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-  .item-info { flex: 1; min-width: 0; }
-  .item-name { font-weight: 600; font-size: 0.95rem; }
-  .item-url { font-size: 0.75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .item-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+/* PLAYER */
+.player-card { background: linear-gradient(160deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08)); border: 1px solid var(--border); border-radius: 20px; padding: 1.4rem; margin-bottom: 1.5rem; backdrop-filter: blur(12px); position: relative; overflow: hidden; }
+.player-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px); pointer-events: none; }
+.now-playing-label { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--c2); font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px; }
+.dot-live { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: dotPulse 1.5s ease-in-out infinite; flex-shrink: 0; }
+@keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.track-info { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+.track-art { width: 64px; height: 64px; border-radius: 14px; background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(6,182,212,0.3)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.8rem; overflow: hidden; position: relative; }
+.track-art::after { content: ''; position: absolute; inset: 0; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); }
+.track-art img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.track-name { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+.track-artist { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
+.track-cat { font-size: 0.65rem; padding: 2px 8px; border-radius: 99px; background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4); color: #a78bfa; font-weight: 700; letter-spacing: 1px; margin-top: 5px; display: inline-block; }
 
-  /* ADD FORM */
-  .add-form { background: rgba(124,58,237,0.06); border: 1px dashed rgba(124,58,237,0.3); border-radius: 10px; padding: 1rem; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+/* PROGRESS */
+.progress-wrap { margin-bottom: 1rem; }
+.progress-bar-bg { height: 3px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; cursor: pointer; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); border-radius: 99px; transition: width 0.5s linear; width: 0%; }
+.progress-times { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--muted); font-family: 'Orbitron', monospace; }
 
-  /* MUSIC */
-  .music-status { display: flex; align-items: center; gap: 0.75rem; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
-  .music-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
-  .music-dot.off { background: var(--muted); }
+/* CONTROLS */
+.controls { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.ctrl-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+.ctrl-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.08); }
+.ctrl-btn svg { width: 16px; height: 16px; fill: var(--muted); stroke: none; }
+.ctrl-btn.active svg { fill: var(--c2); }
+.play-btn { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c2)); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; box-shadow: 0 0 20px rgba(124,58,237,0.4); }
+.play-btn:hover { transform: scale(1.08); }
+.play-btn svg { width: 22px; height: 22px; fill: #fff; margin-left: 2px; }
+.play-btn.paused svg.pause-icon { display: none; }
+.play-btn:not(.paused) svg.play-icon { display: none; }
 
-  /* STATS */
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
-  .stat-edit { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
-  .stat-edit input { margin-bottom: 0.5rem; }
+/* VOLUME */
+.volume-wrap { display: flex; align-items: center; gap: 8px; margin-top: 1rem; }
+.volume-wrap svg { width: 14px; height: 14px; fill: var(--muted); flex-shrink: 0; }
+.vol-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 3px; border-radius: 99px; background: rgba(255,255,255,0.1); outline: none; cursor: pointer; }
+.vol-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--c2); cursor: pointer; }
 
-  /* AVATAR UPLOAD */
-  .avatar-upload-area {
-    display: flex; flex-direction: column; align-items: center; gap: 1rem;
-    background: rgba(124,58,237,0.06); border: 2px dashed rgba(124,58,237,0.3);
-    border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .avatar-upload-area:hover { border-color: var(--c1); background: rgba(124,58,237,0.1); }
-  .avatar-upload-area.drag-over { border-color: var(--c2); background: rgba(6,182,212,0.1); }
-  .avatar-preview-wrap {
-    width: 96px; height: 96px; border-radius: 50%; padding: 3px;
-    background: linear-gradient(135deg, var(--c1), var(--c2), #f0abfc);
-    flex-shrink: 0;
-  }
-  .avatar-preview-inner {
-    width: 100%; height: 100%; border-radius: 50%;
-    background: #1a0a2e;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900;
-    color: #fff; overflow: hidden;
-  }
-  .avatar-preview-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .upload-hint { font-size: 0.85rem; color: var(--muted); text-align: center; }
-  .upload-hint strong { color: var(--c1); }
+/* SECTION */
+.section-label { font-size: 0.68rem; letter-spacing: 4px; text-transform: uppercase; color: var(--c1); font-weight: 700; margin-bottom: 0.8rem; }
 
-  /* THUMBNAIL UPLOAD in add form */
-  .thumb-upload-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-  .thumb-preview {
-    width: 56px; height: 56px; border-radius: 10px; border: 1px dashed var(--border);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    background: rgba(255,255,255,0.03); overflow: hidden; font-size: 1.5rem;
-    cursor: pointer; transition: border-color 0.2s;
-  }
-  .thumb-preview:hover { border-color: var(--c1); }
-  .thumb-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
-  .thumb-upload-info { flex: 1; font-size: 0.8rem; color: var(--muted); }
-  .thumb-upload-info strong { color: var(--c1); display: block; font-size: 0.85rem; }
-  .upload-progress {
-    height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-top: 0.4rem;
-  }
-  .upload-progress-bar { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); width: 0%; transition: width 0.3s; border-radius: 99px; }
+/* SEARCH */
+.search-wrap { position: relative; margin-bottom: 1.5rem; }
+.search-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem 1rem 0.75rem 2.8rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--c1); }
+.search-input::placeholder { color: var(--muted); }
+.search-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; pointer-events: none; }
+.search-results { background: rgba(7,7,15,0.95); border: 1px solid var(--border); border-radius: 12px; margin-top: 0.4rem; overflow: hidden; display: none; max-height: 360px; overflow-y: auto; }
+.search-results.show { display: block; }
+.search-result-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: rgba(124,58,237,0.12); }
+.sr-thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: rgba(255,255,255,0.05); }
+.sr-info { flex: 1; min-width: 0; }
+.sr-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr-channel { font-size: 0.72rem; color: var(--muted); }
+.sr-loading-spin { width: 16px; height: 16px; border: 2px solid rgba(124,58,237,0.3); border-top-color: var(--c2); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* LOADING OVERLAY */
-  #loadingOverlay { position: fixed; inset: 0; background: rgba(9,9,15,0.8); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
-  #loadingOverlay.hidden { display: none; }
-  .spinner { width: 40px; height: 40px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--c1); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* THEMES */
+.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 1.5rem; }
+.theme-btn { border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s; background: var(--card); display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+.theme-btn:hover { border-color: var(--c1); background: rgba(124,58,237,0.1); transform: translateY(-2px); }
+.theme-btn.playing { border-color: var(--c2); background: rgba(6,182,212,0.1); }
+.theme-btn.loading { opacity: 0.6; pointer-events: none; }
+.theme-icon { font-size: 1.5rem; }
+.theme-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; color: var(--text); }
+.theme-desc { font-size: 0.62rem; color: var(--muted); }
 
-  /* BACKGROUND PREVIEW */
-  .bg-preview-box {
-    width: 100%; height: 160px; border-radius: 12px; overflow: hidden;
-    position: relative; background: #07070f;
-    border: 1px solid var(--border); margin-bottom: 1rem; cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .bg-preview-box:hover { border-color: var(--c1); }
-  .bg-preview-box.drag-over { border-color: var(--c2); outline: 2px dashed var(--c2); }
-  .bg-preview-img {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-  }
-  .bg-preview-overlay {
-    position: absolute; inset: 0; background: rgba(9,9,15,var(--ov,0.5));
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
-    transition: background 0.2s;
-  }
-  .bg-preview-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
-  .bg-preview-name { font-family: 'Orbitron', monospace; font-size: 1.1rem; font-weight: 900; background: linear-gradient(90deg,var(--c1),var(--c2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .bg-preview-tag { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
-  .bg-preview-no-img { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 0.5rem; }
-  .bg-preview-no-img span { font-size: 2rem; }
-  .bg-preview-no-img p { font-size: 0.8rem; color: var(--muted); }
-  .opacity-slider-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-  .opacity-slider-wrap label { min-width: 80px; margin: 0; text-transform: uppercase; font-size: 0.78rem; color: var(--muted); }
-  input[type=range] { flex: 1; accent-color: var(--c1); height: 4px; cursor: pointer; }
-  .opacity-val { font-size: 0.9rem; font-weight: 700; color: var(--c1); min-width: 38px; text-align: right; }
+/* QUOTES */
+.quote-card { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.06)); border: 1px solid rgba(124,58,237,0.25); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
+.quote-card:hover { border-color: rgba(124,58,237,0.5); }
+.quote-mark { font-size: 3rem; line-height: 1; color: rgba(124,58,237,0.25); font-family: Georgia, serif; position: absolute; top: 0.5rem; left: 0.9rem; }
+.quote-text { font-size: 1rem; font-weight: 500; line-height: 1.6; padding-left: 0.5rem; color: var(--text); min-height: 2.6em; transition: opacity 0.3s; }
+.quote-author { font-size: 0.78rem; color: var(--c2); margin-top: 0.75rem; font-weight: 600; padding-left: 0.5rem; transition: opacity 0.3s; }
+.quote-hint { font-size: 0.68rem; color: var(--muted); margin-top: 0.5rem; text-align: right; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+.quote-progress-bg { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 99px; margin-right: 10px; overflow: hidden; }
+.quote-progress-fill { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); width: 0%; }
+.quote-fade { opacity: 0; }
 
-  /* HIDDEN FILE INPUT */
-  input[type=file] { display: none; }
+/* TIMER */
+.timer-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; }
+.timer-display { font-family: 'Orbitron', monospace; font-size: 3rem; font-weight: 900; text-align: center; background: linear-gradient(180deg, #fff 0%, var(--c2) 60%, var(--c1) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; margin-bottom: 0.5rem; line-height: 1; }
+.timer-label { text-align: center; font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem; }
+.timer-presets { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.timer-preset { padding: 4px 12px; border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.timer-preset:hover, .timer-preset.active { background: rgba(124,58,237,0.2); border-color: var(--c1); color: #a78bfa; }
+.timer-custom { display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; }
+.timer-custom input { width: 64px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.4rem 0.6rem; color: var(--text); font-family: 'Orbitron', monospace; font-size: 1rem; text-align: center; outline: none; transition: border-color 0.2s; }
+.timer-custom input:focus { border-color: var(--c1); }
+.timer-custom span { color: var(--c2); font-size: 1.2rem; font-weight: 700; }
+.timer-custom label { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; }
+.timer-controls { display: flex; gap: 0.75rem; justify-content: center; }
+.timer-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.6rem 1.4rem; border-radius: 99px; font-family: 'Orbitron', monospace; font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s; }
+.timer-btn:active { transform: scale(0.96); }
+.timer-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.timer-start { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; }
+.timer-pause { background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.4); color: var(--c2); }
+.timer-reset { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); }
+.timer-ring { width: 120px; height: 120px; margin: 0 auto 0.5rem; position: relative; }
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+.timer-ring .bg { stroke: rgba(255,255,255,0.06); }
+.timer-ring .fill { stroke: url(#timerGrad); stroke-dasharray: 339.3; stroke-dashoffset: 0; transition: stroke-dashoffset 0.5s linear; }
+.timer-mode-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); text-align: center; white-space: nowrap; }
+
+/* FOOTER */
+.footer { text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.15); letter-spacing: 2px; text-transform: uppercase; margin-top: 2rem; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(8px); background: rgba(17,17,24,0.95); border: 1px solid rgba(124,58,237,0.4); color: #f1f5f9; font-size: 0.8rem; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 99px; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; backdrop-filter: blur(8px); white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* BREAK ALERT */
+.break-overlay { position: fixed; inset: 0; background: rgba(7,7,15,0.92); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1.5rem; backdrop-filter: blur(8px); }
+.break-overlay.show { display: flex; }
+.break-box { background: linear-gradient(160deg, rgba(124,58,237,0.2), rgba(6,182,212,0.12)); border: 1px solid rgba(124,58,237,0.5); border-radius: 24px; padding: 2.5rem 2rem; text-align: center; max-width: 340px; width: 100%; }
+.break-icon { font-size: 3rem; margin-bottom: 1rem; }
+.break-title { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; color: var(--c2); margin-bottom: 0.75rem; }
+.break-msg { font-size: 0.95rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem; }
+.break-close { padding: 0.7rem 2rem; border-radius: 99px; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-family: 'Orbitron', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 2px; cursor: pointer; border: none; transition: opacity 0.2s; }
+.break-close:hover { opacity: 0.9; }
+
+/* HIDDEN YT */
+#yt-wrap { position: fixed; bottom: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* HIDDEN AUDIO (mp3 từ search) */
+audio#mp3Player { display: none; }
 </style>
 </head>
 <body>
+<div id="particles"></div>
+<div class="bg-glow"></div>
 
-<!-- LOADING -->
-<div id="loadingOverlay"><div class="spinner"></div></div>
+<div id="app">
+  <!-- BACK -->
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Quay lại trang bio
+  </a>
 
-<!-- LOGIN -->
-<div id="loginScreen" style="display:none">
-  <div class="login-logo">HIEJI GAMING</div>
-  <div class="login-card">
-    <h2>🔐 Đăng nhập Admin</h2>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="uEmail" placeholder="admin@email.com" />
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">🎵 FOCUS ZONE</div>
+    <div class="page-sub">Nhạc nền · Tập trung · Thư giãn</div>
+  </div>
+
+  <!-- PLAYER -->
+  <div class="player-card">
+    <div class="now-playing-label"><span class="dot-live" id="liveDot"></span> ĐANG PHÁT</div>
+    <div class="track-info">
+      <div class="track-art" id="trackArt">🎵</div>
+      <div>
+        <div class="track-name" id="trackName">Chọn nhạc hoặc chủ đề bên dưới</div>
+        <div class="track-artist" id="trackArtist">—</div>
+        <span class="track-cat" id="trackCat">Chưa phát</span>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Mật khẩu</label>
-      <input type="password" id="uPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    <div class="progress-wrap">
+      <div class="progress-bar-bg" id="progressBg"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div class="progress-times"><span id="timeElapsed">0:00</span><span id="timeDur">0:00</span></div>
     </div>
-    <div class="err-msg" id="loginErr"></div>
-    <div style="margin-top:1.25rem">
-      <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Đăng nhập</button>
+    <div class="controls">
+      <div class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      </div>
+      <div class="ctrl-btn" onclick="prevTrack()">
+        <svg viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none" style="stroke:var(--muted)"/></svg>
+      </div>
+      <button class="play-btn paused" id="playBtn" onclick="togglePlay()">
+        <svg class="play-icon" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        <svg class="pause-icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <div class="ctrl-btn" onclick="nextTrack()">
+        <svg viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none" style="stroke:var(--muted)"/></svg>
+      </div>
+      <div class="ctrl-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </div>
     </div>
-    <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted);text-align:center">
-      Dùng tài khoản đã tạo trong Supabase Auth
+    <div class="volume-wrap">
+      <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="80" oninput="setVolume(this.value)">
+      <span style="font-size:.75rem;color:var(--muted);min-width:30px" id="volVal">80%</span>
     </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="section-label">🔍 Tìm kiếm nhạc</div>
+  <div class="search-wrap" style="margin-bottom:1.5rem">
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="search-input" id="searchInput" placeholder="Nhập tên bài hát, nghệ sĩ..." autocomplete="off" oninput="debounceSearch(this.value)" onkeydown="handleSearchKey(event)">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- THEMES -->
+  <div class="section-label">🎭 Chủ đề âm nhạc</div>
+  <div class="theme-grid" id="themeGrid"></div>
+
+  <!-- QUOTES -->
+  <div class="section-label">💬 Lời động viên</div>
+  <div class="quote-card" id="quoteCard" onclick="nextQuote(true)">
+    <div class="quote-mark">"</div>
+    <div class="quote-text" id="quoteText">Đang tải lời hay...</div>
+    <div class="quote-author" id="quoteAuthor">—</div>
+    <div class="quote-hint">
+      <div class="quote-progress-bg"><div class="quote-progress-fill" id="quoteProgressFill"></div></div>
+      <span>Bấm để đổi ↻</span>
+    </div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="section-label">⏱ Đồng hồ giải lao (Pomodoro)</div>
+  <div class="timer-card">
+    <div class="timer-ring">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <defs>
+          <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7c3aed"/>
+            <stop offset="100%" style="stop-color:#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <circle class="bg" cx="60" cy="60" r="54"/>
+        <circle class="fill" id="timerCircle" cx="60" cy="60" r="54"/>
+      </svg>
+      <div class="timer-mode-label" id="timerModeLabel">SẴN SÀNG</div>
+    </div>
+    <div class="timer-display" id="timerDisplay">25:00</div>
+    <div class="timer-label" id="timerLabel">Đặt thời gian rồi bắt đầu</div>
+    <div class="timer-presets">
+      <div class="timer-preset active" data-min="25" onclick="setPreset(this)">25 phút</div>
+      <div class="timer-preset" data-min="45" onclick="setPreset(this)">45 phút</div>
+      <div class="timer-preset" data-min="60" onclick="setPreset(this)">60 phút</div>
+      <div class="timer-preset" data-min="90" onclick="setPreset(this)">90 phút</div>
+    </div>
+    <div class="timer-custom">
+      <label>Tự chỉnh:</label>
+      <input type="number" id="customMin" min="1" max="180" value="25" placeholder="25"> <span>:</span>
+      <input type="number" id="customSec" min="0" max="59" value="0" placeholder="00">
+      <label>phút : giây</label>
+    </div>
+    <div class="timer-controls">
+      <button class="timer-btn timer-start" id="timerStartBtn" onclick="startTimer()">▶ BẮT ĐẦU</button>
+      <button class="timer-btn timer-pause" id="timerPauseBtn" onclick="pauseTimer()" disabled>⏸ TẠM DỪNG</button>
+      <button class="timer-btn timer-reset" onclick="resetTimer()">↺ ĐẶT LẠI</button>
+    </div>
+  </div>
+
+  <div class="footer">HieJi Gaming © 2025 · Focus Zone</div>
+</div>
+
+<!-- YT PLAYER -->
+<div id="yt-wrap"><div id="yt-player"></div></div>
+
+<!-- AUDIO PLAYER for mp3 search results -->
+<audio id="mp3Player"></audio>
+
+<!-- BREAK ALERT -->
+<div class="break-overlay" id="breakOverlay">
+  <div class="break-box">
+    <div class="break-icon" id="breakIcon">⏰</div>
+    <div class="break-title" id="breakTitle">HẾT GIỜ RỒI!</div>
+    <div class="break-msg" id="breakMsg">Bạn đã học xong một hiệp! Hãy nghỉ ngơi 5–10 phút, uống nước, và duỗi người nhé. Bạn làm tốt lắm! 💪</div>
+    <button class="break-close" onclick="closeBreak()">✓ ĐÃ HIỂU, TIẾP TỤC</button>
   </div>
 </div>
 
-<!-- ADMIN SHELL -->
-<div id="adminShell">
-  <div class="topbar">
-    <span class="topbar-logo">HJ ADMIN</span>
-    <span class="topbar-badge">PANEL</span>
-    <span class="topbar-user" id="topbarUser"></span>
-    <div class="topbar-actions">
-      <span class="save-status" id="saveStatus">Chưa có thay đổi</span>
-      <button class="btn btn-primary btn-sm" id="saveBtn" onclick="saveAll()">💾 Lưu tất cả</button>
-      <button class="btn btn-secondary btn-sm" onclick="window.open('https://hiejigaming.netlify.app/','_blank')">← Xem trang bio</button>
-      <button class="btn btn-secondary btn-sm" onclick="doLogout()">Đăng xuất</button>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('profile',this)">👤 Profile</div>
-    <div class="tab" onclick="switchTab('bg',this)">🖼 Nền</div>
-    <div class="tab" onclick="switchTab('music',this)">🎵 Nhạc</div>
-    <div class="tab" onclick="switchTab('games',this)">🎮 Game</div>
-    <div class="tab" onclick="switchTab('apps',this)">📱 App</div>
-    <div class="tab" onclick="switchTab('social',this)">🔗 Mạng xã hội</div>
-    <div class="tab" onclick="switchTab('stats',this)">📊 Thống kê</div>
-    <div class="tab" onclick="switchTab('videos',this)">📹 Video HD</div>
-    <div class="tab" onclick="switchTab('settings',this)">⚙️ Cài đặt</div>
-  </div>
-
-  <div class="content">
-
-    <!-- PROFILE / AVATAR -->
-    <div id="panel-profile" class="panel active">
-      <div class="panel-title">👤 Ảnh đại diện</div>
-      <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Ảnh này sẽ thay thế chữ "HJ" trên trang bio. Khuyến nghị ảnh vuông, tối thiểu 200×200px.</p>
-
-        <!-- Drop zone -->
-        <div class="avatar-upload-area" id="avatarDropZone"
-             onclick="document.getElementById('avatarFileInput').click()"
-             ondragover="avatarDragOver(event)" ondragleave="avatarDragLeave(event)" ondrop="avatarDrop(event)">
-          <div class="avatar-preview-wrap">
-            <div class="avatar-preview-inner" id="avatarPreviewInner">HJ</div>
-          </div>
-          <div class="upload-hint">
-            <strong>Bấm hoặc kéo thả ảnh vào đây</strong>
-            Hỗ trợ JPG, PNG, WEBP · Tối đa 5MB
-          </div>
-        </div>
-        <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarFile(this.files[0])">
-
-        <!-- Progress -->
-        <div id="avatarProgressWrap" style="display:none;margin-bottom:1rem">
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem" id="avatarProgressLabel">Đang tải lên...</div>
-          <div class="upload-progress"><div class="upload-progress-bar" id="avatarProgressBar"></div></div>
-        </div>
-
-        <!-- Current URL -->
-        <div class="form-group">
-          <label>URL ảnh hiện tại</label>
-          <input type="url" id="avatarUrl" placeholder="https://... (tự động điền sau khi upload)" readonly
-                 style="cursor:default;opacity:.7" />
-        </div>
-
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
-          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('avatarFileInput').click()">📷 Chọn ảnh</button>
-          <button class="btn btn-danger" onclick="removeAvatar()">🗑 Xóa ảnh (dùng chữ HJ)</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- BACKGROUND -->
-    <div id="panel-bg" class="panel">
-      <div class="panel-title">🖼 Ảnh nền trang bio</div>
-      <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Ảnh nền sẽ trải đầy toàn trang bio. Khuyến nghị ảnh ngang (1920×1080 hoặc rộng hơn). Bạn có thể điều chỉnh độ tối để chữ dễ đọc.</p>
-
-        <!-- Live preview giả lập trang bio -->
-        <div class="bg-preview-box" id="bgDropZone"
-             onclick="document.getElementById('bgFileInput').click()"
-             ondragover="bgDragOver(event)" ondragleave="bgDragLeave(event)" ondrop="bgDrop(event)">
-          <img id="bgPreviewImg" class="bg-preview-img" src="" alt="" style="display:none">
-          <div class="bg-preview-overlay" id="bgPreviewOverlay" style="--ov:0.5">
-            <div id="bgPreviewNoImg" class="bg-preview-no-img">
-              <span>🖼</span>
-              <p>Bấm hoặc kéo thả ảnh để xem trước</p>
-            </div>
-            <div id="bgPreviewContent" style="display:none;text-align:center">
-              <div class="bg-preview-label">Gaming Creator</div>
-              <div class="bg-preview-name">HieJi Gaming</div>
-              <div class="bg-preview-tag">🎮 Xem trước trang bio</div>
-            </div>
-          </div>
-        </div>
-        <input type="file" id="bgFileInput" accept="image/*" onchange="handleBgFile(this.files[0])">
-
-        <!-- Opacity slider -->
-        <div class="opacity-slider-wrap">
-          <label>Độ tối</label>
-          <input type="range" id="bgOpacity" min="0" max="90" value="50" step="5" oninput="updateBgOpacity(this.value)">
-          <span class="opacity-val" id="bgOpacityVal">50%</span>
-        </div>
-
-        <!-- Progress -->
-        <div id="bgProgressWrap" style="display:none;margin-bottom:1rem">
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem" id="bgProgressLabel">Đang tải lên...</div>
-          <div class="upload-progress"><div class="upload-progress-bar" id="bgProgressBar"></div></div>
-        </div>
-
-        <!-- URL readonly -->
-        <div class="form-group">
-          <label>URL ảnh nền hiện tại</label>
-          <input type="url" id="bgUrl" placeholder="https://... (tự động điền sau khi upload)" readonly style="cursor:default;opacity:.7" />
-        </div>
-
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
-          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('bgFileInput').click()">🖼 Chọn ảnh nền</button>
-          <button class="btn btn-danger" onclick="removeBg()">🗑 Xóa ảnh nền (dùng nền tối mặc định)</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MUSIC -->
-    <div id="panel-music" class="panel">
-      <div class="panel-title">🎵 Nhạc nền</div>
-      <div class="card">
-        <div id="musicStatus" class="music-status">
-          <div class="music-dot off" id="musicDot"></div>
-          <div>
-            <div style="font-weight:600;font-size:.9rem" id="musicStatusTitle">Chưa có nhạc</div>
-            <div style="font-size:.75rem;color:var(--muted)">Thêm link nhạc bên dưới</div>
-          </div>
-        </div>
-        <div class="form-group"><label>Link nhạc (YouTube)</label><input type="url" id="musicUrl" placeholder="https://www.youtube.com/watch?v=..." /></div>
-        <div class="form-row">
-          <div class="form-group"><label>Tên bài hát</label><input type="text" id="musicTitle2" placeholder="Tên bài hát" /></div>
-          <div class="form-group"><label>Nghệ sĩ / Album</label><input type="text" id="musicSource" placeholder="Nghệ sĩ" /></div>
-        </div>
-        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <button class="btn btn-primary" style="width:auto" onclick="applyMusic()">✅ Áp dụng</button>
-          <button class="btn btn-danger" onclick="removeMusic()">🗑 Xóa nhạc</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- GAMES -->
-    <div id="panel-games" class="panel">
-      <div class="panel-title">🎮 Quản lý Game</div>
-      <div class="card">
-        <div class="card-header"><h3>Danh sách game</h3></div>
-        <div class="item-list" id="gamesList"></div>
-        <div class="add-form">
-          <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm game mới</div>
-
-          <!-- Thumbnail upload -->
-          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
-          <div class="thumb-upload-row">
-            <div class="thumb-preview" id="gThumbPreview" onclick="document.getElementById('gThumbInput').click()">🎮</div>
-            <div class="thumb-upload-info">
-              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
-              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
-              <div class="upload-progress" id="gThumbProgress" style="display:none"><div class="upload-progress-bar" id="gThumbBar"></div></div>
-            </div>
-          </div>
-          <input type="file" id="gThumbInput" accept="image/*" onchange="handleThumbFile('g',this.files[0])">
-          <input type="hidden" id="gThumbUrl" />
-
-          <div class="form-row">
-            <div class="form-group"><label>Tên game</label><input type="text" id="gName" placeholder="Tên game" /></div>
-            <div class="form-group"><label>Icon (emoji)</label><input type="text" id="gIcon" placeholder="🎮" maxlength="4" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Mô tả</label><input type="text" id="gDesc" placeholder="Mô tả ngắn" /></div>
-            <div class="form-group"><label>Màu (hex)</label><input type="text" id="gColor" placeholder="#7c3aed" /></div>
-          </div>
-          <div class="form-group"><label>Link tải / trang game</label><input type="url" id="gUrl" placeholder="https://..." /></div>
-          <div class="form-group">
-            <label>▶ Link video hướng dẫn (YouTube) <span style="color:var(--muted);font-weight:400">(tuỳ chọn)</span></label>
-            <input type="url" id="gVideoUrl" placeholder="https://youtube.com/... hoặc https://tiktok.com/..." />
-          </div>
-          <button class="btn btn-primary" style="width:auto" onclick="addItem('games')">➕ Thêm game</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- APPS -->
-    <div id="panel-apps" class="panel">
-      <div class="panel-title">📱 Quản lý Ứng dụng</div>
-      <div class="card">
-        <div class="card-header"><h3>Danh sách ứng dụng</h3></div>
-        <div class="item-list" id="appsList"></div>
-        <div class="add-form">
-          <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm ứng dụng mới</div>
-
-          <!-- Thumbnail upload -->
-          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
-          <div class="thumb-upload-row">
-            <div class="thumb-preview" id="aThumbPreview" onclick="document.getElementById('aThumbInput').click()">📱</div>
-            <div class="thumb-upload-info">
-              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
-              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
-              <div class="upload-progress" id="aThumbProgress" style="display:none"><div class="upload-progress-bar" id="aThumbBar"></div></div>
-            </div>
-          </div>
-          <input type="file" id="aThumbInput" accept="image/*" onchange="handleThumbFile('a',this.files[0])">
-          <input type="hidden" id="aThumbUrl" />
-
-          <div class="form-row">
-            <div class="form-group"><label>Tên app</label><input type="text" id="aName" placeholder="Tên ứng dụng" /></div>
-            <div class="form-group"><label>Icon (emoji)</label><input type="text" id="aIcon" placeholder="📱" maxlength="4" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Mô tả</label><input type="text" id="aDesc" placeholder="Mô tả ngắn" /></div>
-            <div class="form-group"><label>Màu (hex)</label><input type="text" id="aColor" placeholder="#06b6d4" /></div>
-          </div>
-          <div class="form-group"><label>Link tải / trang app</label><input type="url" id="aUrl" placeholder="https://..." /></div>
-          <div class="form-group">
-            <label>▶ Link video hướng dẫn (YouTube) <span style="color:var(--muted);font-weight:400">(tuỳ chọn)</span></label>
-            <input type="url" id="aVideoUrl" placeholder="https://youtube.com/... hoặc https://tiktok.com/..." />
-          </div>
-          <button class="btn btn-primary" style="width:auto" onclick="addItem('apps')">➕ Thêm ứng dụng</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SOCIAL -->
-    <div id="panel-social" class="panel">
-      <div class="panel-title">🔗 Mạng xã hội</div>
-      <div class="card">
-        <div class="card-header"><h3>Các nền tảng</h3></div>
-        <div class="item-list" id="socialList"></div>
-        <div class="add-form">
-          <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm mạng xã hội</div>
-
-          <!-- Thumbnail upload -->
-          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
-          <div class="thumb-upload-row">
-            <div class="thumb-preview" id="sThumbPreview" onclick="document.getElementById('sThumbInput').click()">🔗</div>
-            <div class="thumb-upload-info">
-              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
-              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
-              <div class="upload-progress" id="sThumbProgress" style="display:none"><div class="upload-progress-bar" id="sThumbBar"></div></div>
-            </div>
-          </div>
-          <input type="file" id="sThumbInput" accept="image/*" onchange="handleThumbFile('s',this.files[0])">
-          <input type="hidden" id="sThumbUrl" />
-
-          <div class="form-row">
-            <div class="form-group"><label>Tên nền tảng</label><input type="text" id="sName" placeholder="YouTube" /></div>
-            <div class="form-group"><label>Icon (emoji)</label><input type="text" id="sIcon" placeholder="▶️" maxlength="4" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Mô tả</label><input type="text" id="sDesc" placeholder="Mô tả" /></div>
-            <div class="form-group"><label>Màu (hex)</label><input type="text" id="sColor" placeholder="#ef4444" /></div>
-          </div>
-          <div class="form-group"><label>Link</label><input type="url" id="sUrl" placeholder="https://..." /></div>
-          <button class="btn btn-primary" style="width:auto" onclick="addItem('social')">➕ Thêm</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div id="panel-stats" class="panel">
-      <div class="panel-title">📊 Thống kê</div>
-      <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Chỉnh sửa 3 con số hiển thị trên trang bio</p>
-        <div class="stats-grid" id="statsEditGrid"></div>
-      </div>
-    </div>
-
-    <!-- VIDEOS -->
-    <div id="panel-videos" class="panel">
-      <div class="panel-title">📹 Video hướng dẫn</div>
-      <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Thêm video YouTube hướng dẫn cho các game &amp; app. Video sẽ hiện trên trang bio với thumbnail và nút play.</p>
-        <div class="card-header"><h3>Danh sách video</h3></div>
-        <div class="item-list" id="videoList"></div>
-        <div class="add-form">
-          <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm video mới</div>
-          <div class="form-group"><label>Link YouTube</label><input type="url" id="vUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="previewVideoThumb()" /></div>
-          <!-- Video thumbnail preview -->
-          <div id="vThumbPreviewWrap" style="display:none;margin-bottom:.75rem">
-            <label style="margin-bottom:.4rem">Xem trước thumbnail</label>
-            <div style="position:relative;width:100%;max-width:320px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
-              <img id="vThumbPreviewImg" src="" alt="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-                <div style="width:40px;height:40px;border-radius:50%;background:rgba(124,58,237,0.85);display:flex;align-items:center;justify-content:center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="form-group"><label>Tiêu đề video</label><input type="text" id="vTitle" placeholder="Hướng dẫn chơi Free Fire cho người mới" /></div>
-          <div class="form-row">
-            <div class="form-group"><label>Mô tả ngắn</label><input type="text" id="vDesc" placeholder="Mô tả (tuỳ chọn)" /></div>
-            <div class="form-group"><label>Danh mục</label>
-              <select id="vCategory">
-                <option value="">-- Chọn --</option>
-                <option value="Game">🎮 Game</option>
-                <option value="App">📱 App</option>
-                <option value="Tips">💡 Tips</option>
-                <option value="Review">⭐ Review</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group"><label>Màu danh mục (hex)</label><input type="text" id="vCatColor" placeholder="#7c3aed" /></div>
-          <button class="btn btn-primary" style="width:auto" onclick="addVideo()">➕ Thêm video</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="panel-settings" class="panel">
-      <div class="panel-title">⚙️ Cài đặt</div>
-      <div class="card">
-        <h3 style="margin-bottom:1rem;font-size:1rem">🔑 Đổi mật khẩu</h3>
-        <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="newPwd" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" /></div>
-        <div class="err-msg" id="pwdMsg"></div>
-        <button class="btn btn-primary" style="width:auto" onclick="changePassword()">Đổi mật khẩu</button>
-        <p style="margin-top:.75rem;font-size:.8rem;color:var(--muted)">Mật khẩu được quản lý bởi Supabase Auth — thay đổi sẽ có hiệu lực ngay.</p>
-      </div>
-      <div class="card" style="margin-top:1rem">
-        <h3 style="margin-bottom:1rem;font-size:1rem;color:var(--danger)">⚠️ Vùng nguy hiểm</h3>
-        <button class="btn btn-danger" onclick="resetData()">🔄 Khôi phục dữ liệu mặc định</button>
-      </div>
-    </div>
-
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
-// ⚙️  CẤU HÌNH SUPABASE
-// ══════════════════════════════════════════════
-const SUPABASE_URL      = 'https://iivwsnbhkffxvmccktuj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdndzbmJoa2ZmeHZtY2NrdHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTY3NDEsImV4cCI6MjA5ODI3Mjc0MX0.EPfaIbHGMDiZJyK6XKtt-iKu6Ip22AY7hFpKom1PzuA';
-const STORAGE_BUCKET    = 'hieji-images';
-// ══════════════════════════════════════════════
+// ═══════════ CONFIG ═══════════
+// URL Cloudflare Worker của bạn — đã giấu API key an toàn ở phía server
+const WORKER_URL = "https://hieji-music-proxy.shim52547.workers.dev";
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ═══════════ DATA: THEMES (mỗi theme nhiều video để random) ═══════════
+const THEMES = [
+  { id:'lofi', icon:'🌙', name:'Lo-Fi', desc:'Thư giãn', vids:[
+      'jfKfPfyJRdk', '5qap5aO4i9A', '7NOSDKb0HlU', 'rJYpsZOijVo'
+    ] },
+  { id:'jazz', icon:'🎷', name:'Jazz', desc:'Tập trung', vids:[
+      'Dx5qFachd3A', 'fEvM-OUbaKs', 'neV3EPgvZ3g'
+    ] },
+  { id:'nature', icon:'🌿', name:'Thiên nhiên', desc:'Bình yên', vids:[
+      'eKFTSSKCzWA', 'qRTVg8HVeP8', '1ZYbU82GVz4'
+    ] },
+  { id:'gaming', icon:'🎮', name:'Gaming', desc:'Năng lượng', vids:[
+      '3mK5n0kPRrs', 'fGGRr83qhgo', 'M_AVAa1nUbQ'
+    ] },
+  { id:'study', icon:'📚', name:'Học bài', desc:'Tập trung', vids:[
+      '5qap5aO4i9A', 'WPni755-Krg', 'hHW1oY26kxQ', '4xDzrJKXOOY'
+    ] },
+  { id:'chill', icon:'✨', name:'Chill', desc:'Thoải mái', vids:[
+      '36YnV9STBqc', 'lTRiuFIWV54', 'kgx4WGK0oNU'
+    ] },
+];
 
-const DEFAULT_DATA = {
-  profile: { avatarUrl: '' },
-  bg: { url: '', opacity: 50 },
-  music: { url: '', title: 'Chưa có nhạc', source: '' },
-  stats: [
-    { label: 'Videos', value: '120+' },
-    { label: 'Subscribers', value: '10K' },
-    { label: 'Games', value: '50+' }
-  ],
-  games: [
-    { name: 'Free Fire', desc: 'Battle Royale - Review & Gameplay', url: '#', icon: '🔥', color: '#f97316', thumb: '' },
-    { name: 'Mobile Legends', desc: 'MOBA - Tips & Tricks', url: '#', icon: '⚔️', color: '#7c3aed', thumb: '' }
-  ],
-  apps: [
-    { name: 'GameBooster Pro', desc: 'Tối ưu hiệu suất gaming', url: '#', icon: '⚡', color: '#06b6d4', thumb: '' }
-  ],
-  social: [
-    { name: 'YouTube', desc: 'Subscribe kênh HieJi Gaming', url: 'https://youtube.com', icon: '▶️', color: '#ef4444', thumb: '' },
-    { name: 'Facebook', desc: 'Trang chính thức', url: 'https://facebook.com', icon: '💬', color: '#3b82f6', thumb: '' },
-    { name: 'TikTok', desc: 'Clip gaming ngắn', url: 'https://tiktok.com', icon: '🎵', color: '#ec4899', thumb: '' }
-  ],
-  videos: [
-    { title: 'Hướng dẫn chơi Free Fire cho người mới', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'Game', categoryColor: '#f97316' },
-    { title: 'Cách tối ưu GameBooster Pro', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'App', categoryColor: '#06b6d4' }
-  ]
+// ═══════════ DATA: QUOTES (danh nhân thế giới + Việt Nam) ═══════════
+const QUOTES = [
+  { text: 'Mỗi ngày tiến một bước nhỏ. Sau một năm, bạn đã đi được 365 bước.', author: 'Khuyết danh' },
+  { text: 'Không cần hoàn hảo ngay từ đầu. Chỉ cần bắt đầu.', author: 'Khuyết danh' },
+  { text: 'Thành công không phải là đích đến, mà là cuộc hành trình không ngừng cải thiện.', author: 'Tony Robbins' },
+  { text: 'Hôm nay khó, ngày mai dễ. Kiên trì là chìa khóa.', author: 'Khuyết danh' },
+  { text: 'Não bộ cũng như cơ bắp — càng luyện càng mạnh.', author: 'Nghiên cứu khoa học' },
+  { text: 'Bạn chưa thua. Bạn chỉ đang học cách để thắng.', author: 'Khuyết danh' },
+  { text: 'Tập trung 25 phút hiệu quả hơn loay hoay 3 tiếng với điện thoại.', author: 'Phương pháp Pomodoro' },
+  { text: 'Người thành công không phải làm nhiều hơn, họ làm đúng hơn.', author: 'Khuyết danh' },
+  { text: 'Cứ tiếp tục. Mọi chuyên gia từng là người mới bắt đầu.', author: 'Helen Hayes' },
+  { text: 'Đừng so sánh chương 1 của mình với chương 20 của người khác.', author: 'Khuyết danh' },
+  { text: 'Nghỉ ngơi là một phần của công việc, không phải trốn việc.', author: 'Khoa học thần kinh' },
+  { text: 'Kỷ luật là cầu nối giữa ước mơ và thành tựu.', author: 'Jim Rohn' },
+  { text: 'Bộ não cần nước, giấc ngủ, và vận động — đừng bỏ qua điều đó.', author: 'Khoa học sức khoẻ' },
+  { text: 'Mỗi lần ngồi xuống học là một lần đầu tư cho tương lai bạn.', author: 'Khuyết danh' },
+  { text: 'Đừng chờ có hứng. Hứng đến sau khi bạn bắt đầu.', author: 'Tâm lý học hành vi' },
+  { text: 'Học không bao giờ là cùng, học mãi để tiến bộ mãi.', author: 'Hồ Chí Minh' },
+  { text: 'Vì lợi ích mười năm trồng cây, vì lợi ích trăm năm trồng người.', author: 'Hồ Chí Minh' },
+  { text: 'Không có việc gì khó, chỉ sợ lòng không bền. Đào núi và lấp biển, quyết chí ắt làm nên.', author: 'Hồ Chí Minh' },
+  { text: 'Đi một ngày đàng, học một sàng khôn.', author: 'Tục ngữ Việt Nam' },
+  { text: 'Hữu chí cánh thành — có ý chí thì việc gì cũng thành.', author: 'Nguyễn Trãi' },
+  { text: 'Học rộng rồi mới ra làm, học cho thật biết rồi mới hành.', author: 'Lê Quý Đôn' },
+  { text: 'Người có học mà không có hạnh, chẳng khác gì người không học.', author: 'Nguyễn Bỉnh Khiêm' },
+  { text: 'Tôi tư duy, vậy tôi tồn tại.', author: 'René Descartes' },
+  { text: 'Thiên tài chỉ có 1% là cảm hứng, 99% còn lại là mồ hôi và nước mắt.', author: 'Thomas Edison' },
+  { text: 'Trí tưởng tượng quan trọng hơn kiến thức.', author: 'Albert Einstein' },
+  { text: 'Tôi không thất bại. Tôi chỉ tìm ra 10.000 cách không hoạt động.', author: 'Thomas Edison' },
+  { text: 'Cách duy nhất để làm tốt công việc là yêu thích những gì bạn làm.', author: 'Steve Jobs' },
+  { text: 'Đừng sợ thất bại. Hãy sợ việc không cố gắng hết mình.', author: 'Michael Jordan' },
+  { text: 'Chúng ta là những gì chúng ta lặp lại nhiều lần. Sự xuất sắc không phải là hành động, mà là thói quen.', author: 'Aristotle' },
+  { text: 'Kiến thức là sức mạnh.', author: 'Francis Bacon' },
+  { text: 'Hãy sống như thể bạn sẽ chết ngày mai. Hãy học như thể bạn sẽ sống mãi.', author: 'Mahatma Gandhi' },
+  { text: 'Người chiến thắng không bao giờ bỏ cuộc, người bỏ cuộc không bao giờ chiến thắng.', author: 'Vince Lombardi' },
+];
+
+// ═══════════ STATE ═══════════
+let ytPlayer = null, ytReady = false;
+let currentVidId = null, isPlaying = false;
+let currentMode = 'yt'; // 'yt' hoặc 'mp3'
+let shuffle = false, repeat = false;
+let currentTheme = null;
+let quoteIdx = Math.floor(Math.random() * QUOTES.length);
+let quoteAutoTimer = null, quoteProgressTimer = null;
+const QUOTE_INTERVAL = 15000; // 15 giây
+let timerInterval = null, timerTotal = 25*60, timerLeft = 25*60, timerRunning = false;
+let searchTimeout = null;
+const mp3Player = document.getElementById('mp3Player');
+
+// ═══════════ YOUTUBE API ═══════════
+const ytScript = document.createElement('script');
+ytScript.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(ytScript);
+
+window.onYouTubeIframeAPIReady = function() {
+  ytReady = true;
+  ytPlayer = new YT.Player('yt-player', {
+    height: '1', width: '1', videoId: '',
+    playerVars: { autoplay: 0, controls: 0 },
+    events: {
+      onStateChange: onPlayerState,
+      onReady: () => { setVolume(document.getElementById('volSlider').value); },
+      onError: onPlayerError
+    }
+  });
 };
 
-let D = JSON.parse(JSON.stringify(DEFAULT_DATA));
-let currentUser = null;
-
-// ══════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════
-async function doLogin() {
-  const email = document.getElementById('uEmail').value.trim();
-  const pass  = document.getElementById('uPass').value;
-  const errEl = document.getElementById('loginErr');
-  const btn   = document.getElementById('loginBtn');
-  errEl.style.display = 'none';
-  btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.disabled = false; btn.textContent = 'Đăng nhập';
-  if (error) { errEl.textContent = 'Email hoặc mật khẩu không đúng'; errEl.style.display = 'block'; return; }
-  currentUser = data.user;
-  showAdmin();
-}
-
-async function doLogout() { await sb.auth.signOut(); location.reload(); }
-
-async function changePassword() {
-  const np = document.getElementById('newPwd').value;
-  const msg = document.getElementById('pwdMsg');
-  if (np.length < 6) { msg.textContent = 'Mật khẩu phải có ít nhất 6 ký tự'; msg.style.display = 'block'; return; }
-  const { error } = await sb.auth.updateUser({ password: np });
-  if (error) { msg.textContent = 'Lỗi: ' + error.message; msg.style.display = 'block'; return; }
-  msg.style.color = '#22c55e'; msg.textContent = '✅ Đổi mật khẩu thành công!'; msg.style.display = 'block';
-  setTimeout(() => { msg.style.display = 'none'; msg.style.color = ''; }, 3000);
-}
-
-// ══════════════════════════════════════════════
-// STORAGE UPLOAD
-// ══════════════════════════════════════════════
-async function uploadImage(file, folder, progressBarId) {
-  const ext  = file.name.split('.').pop().toLowerCase();
-  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-
-  // Fake progress animation while uploading
-  const bar = document.getElementById(progressBarId);
-  let fakeP = 0;
-  const fakeTimer = setInterval(() => { fakeP = Math.min(fakeP + 8, 85); if (bar) bar.style.width = fakeP + '%'; }, 120);
-
-  const { data, error } = await sb.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false });
-
-  clearInterval(fakeTimer);
-  if (bar) bar.style.width = '100%';
-
-  if (error) throw new Error(error.message);
-
-  const { data: urlData } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-  return urlData.publicUrl;
-}
-
-// ══════════════════════════════════════════════
-// AVATAR UPLOAD
-// ══════════════════════════════════════════════
-function avatarDragOver(e) { e.preventDefault(); document.getElementById('avatarDropZone').classList.add('drag-over'); }
-function avatarDragLeave()  { document.getElementById('avatarDropZone').classList.remove('drag-over'); }
-function avatarDrop(e)      { e.preventDefault(); avatarDragLeave(); const f = e.dataTransfer.files[0]; if (f) handleAvatarFile(f); }
-
-async function handleAvatarFile(file) {
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 5MB.'); return; }
-  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
-
-  // Show local preview instantly
-  const reader = new FileReader();
-  reader.onload = e => {
-    const inner = document.getElementById('avatarPreviewInner');
-    inner.innerHTML = `<img src="${e.target.result}" alt="Avatar preview">`;
-  };
-  reader.readAsDataURL(file);
-
-  // Upload to Supabase Storage
-  const progressWrap = document.getElementById('avatarProgressWrap');
-  const progressLabel = document.getElementById('avatarProgressLabel');
-  progressWrap.style.display = 'block';
-  progressLabel.textContent = 'Đang tải lên...';
-
-  try {
-    const url = await uploadImage(file, 'avatars', 'avatarProgressBar');
-    D.profile.avatarUrl = url;
-    document.getElementById('avatarUrl').value = url;
-    progressLabel.textContent = '✅ Tải lên thành công!';
-    progressLabel.style.color = '#22c55e';
-    markChanged();
-    setTimeout(() => { progressWrap.style.display = 'none'; progressLabel.style.color = ''; }, 2500);
-  } catch (err) {
-    progressLabel.textContent = '❌ Lỗi: ' + err.message;
-    progressLabel.style.color = 'var(--danger)';
+function onPlayerError(e) {
+  // Video lỗi / không nhúng được -> tự next sang bài khác trong theme
+  showToast('Video này không phát được, đang chuyển bài khác...');
+  if (currentTheme) {
+    setTimeout(() => playRandomFromTheme(currentTheme), 600);
   }
 }
 
-function removeAvatar() {
-  D.profile.avatarUrl = '';
-  document.getElementById('avatarUrl').value = '';
-  document.getElementById('avatarPreviewInner').innerHTML = 'HJ';
-  markChanged();
-}
-
-// ══════════════════════════════════════════════
-// BACKGROUND UPLOAD
-// ══════════════════════════════════════════════
-function bgDragOver(e)  { e.preventDefault(); document.getElementById('bgDropZone').classList.add('drag-over'); }
-function bgDragLeave()  { document.getElementById('bgDropZone').classList.remove('drag-over'); }
-function bgDrop(e)      { e.preventDefault(); bgDragLeave(); const f = e.dataTransfer.files[0]; if (f) handleBgFile(f); }
-
-async function handleBgFile(file) {
-  if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 10MB.'); return; }
-  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
-
-  // Local preview instantly
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = document.getElementById('bgPreviewImg');
-    img.src = ev.target.result;
-    img.style.display = 'block';
-    document.getElementById('bgPreviewNoImg').style.display = 'none';
-    document.getElementById('bgPreviewContent').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-
-  const progressWrap = document.getElementById('bgProgressWrap');
-  const progressLabel = document.getElementById('bgProgressLabel');
-  progressWrap.style.display = 'block';
-  progressLabel.textContent = 'Đang tải lên...';
-  progressLabel.style.color = '';
-
-  try {
-    const url = await uploadImage(file, 'backgrounds', 'bgProgressBar');
-    D.bg.url = url;
-    document.getElementById('bgUrl').value = url;
-    progressLabel.textContent = '✅ Tải lên thành công!';
-    progressLabel.style.color = '#22c55e';
-    markChanged();
-    setTimeout(() => { progressWrap.style.display = 'none'; progressLabel.style.color = ''; }, 2500);
-  } catch (err) {
-    progressLabel.textContent = '❌ Lỗi: ' + err.message;
-    progressLabel.style.color = 'var(--danger)';
+function onPlayerState(e) {
+  const S = YT.PlayerState;
+  if (e.data === S.PLAYING) {
+    isPlaying = true;
+    document.getElementById('playBtn').classList.remove('paused');
+    setLiveDot(true);
+    startProgressPoll();
+  } else if (e.data === S.PAUSED || e.data === S.ENDED) {
+    isPlaying = false;
+    document.getElementById('playBtn').classList.add('paused');
+    setLiveDot(false);
+    if (e.data === S.ENDED) {
+      if (repeat) ytPlayer.playVideo();
+      else if (currentTheme) playRandomFromTheme(currentTheme);
+    }
   }
 }
 
-function updateBgOpacity(val) {
-  document.getElementById('bgOpacityVal').textContent = val + '%';
-  document.getElementById('bgPreviewOverlay').style.setProperty('--ov', val / 100);
-  D.bg.opacity = parseInt(val);
-  markChanged();
+function setLiveDot(on) {
+  const dot = document.getElementById('liveDot');
+  dot.style.background = on ? '#22c55e' : 'var(--muted)';
+  dot.style.boxShadow = on ? '0 0 6px #22c55e' : 'none';
 }
 
-function removeBg() {
-  D.bg = { url: '', opacity: 50 };
-  document.getElementById('bgUrl').value = '';
-  document.getElementById('bgPreviewImg').style.display = 'none';
-  document.getElementById('bgPreviewImg').src = '';
-  document.getElementById('bgPreviewNoImg').style.display = 'flex';
-  document.getElementById('bgPreviewContent').style.display = 'none';
-  document.getElementById('bgOpacity').value = 50;
-  document.getElementById('bgOpacityVal').textContent = '50%';
-  document.getElementById('bgProgressWrap').style.display = 'none';
-  document.getElementById('bgFileInput').value = '';
-  markChanged();
-}
-
-function renderBgPanel() {
-  const bg = D.bg || { url: '', opacity: 50 };
-  const opacity = bg.opacity ?? 50;
-  document.getElementById('bgUrl').value = bg.url || '';
-  document.getElementById('bgOpacity').value = opacity;
-  document.getElementById('bgOpacityVal').textContent = opacity + '%';
-  document.getElementById('bgPreviewOverlay').style.setProperty('--ov', opacity / 100);
-  const img = document.getElementById('bgPreviewImg');
-  if (bg.url) {
-    img.src = bg.url;
-    img.style.display = 'block';
-    document.getElementById('bgPreviewNoImg').style.display = 'none';
-    document.getElementById('bgPreviewContent').style.display = 'block';
+function setTrackUI(title, artist, cat, thumbUrl) {
+  document.getElementById('trackName').textContent = title || 'Đang phát...';
+  document.getElementById('trackArtist').textContent = artist || '—';
+  document.getElementById('trackCat').textContent = cat || '🎵';
+  if (thumbUrl) {
+    document.getElementById('trackArt').innerHTML = `<img src="${thumbUrl}" alt="">`;
   } else {
-    img.style.display = 'none';
-    img.src = '';
-    document.getElementById('bgPreviewNoImg').style.display = 'flex';
-    document.getElementById('bgPreviewContent').style.display = 'none';
+    document.getElementById('trackArt').innerHTML = '🎵';
   }
 }
 
-// ══════════════════════════════════════════════
-// THUMBNAIL UPLOAD (game / app / social)
-// ══════════════════════════════════════════════
-const THUMB_DEFAULTS = { g: '🎮', a: '📱', s: '🔗' };
-
-async function handleThumbFile(prefix, file) {
-  if (!file) return;
-  if (file.size > 3 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 3MB.'); return; }
-  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
-
-  // Local preview
-  const reader = new FileReader();
-  reader.onload = e => {
-    const prev = document.getElementById(prefix + 'ThumbPreview');
-    prev.innerHTML = `<img src="${e.target.result}" alt="thumb">`;
-  };
-  reader.readAsDataURL(file);
-
-  // Show progress
-  const prog = document.getElementById(prefix + 'ThumbProgress');
-  prog.style.display = 'block';
-
-  try {
-    const url = await uploadImage(file, 'thumbnails', prefix + 'ThumbBar');
-    document.getElementById(prefix + 'ThumbUrl').value = url;
-    setTimeout(() => { prog.style.display = 'none'; }, 1800);
-  } catch (err) {
-    alert('Lỗi upload thumbnail: ' + err.message);
-    prog.style.display = 'none';
+// Phát qua YouTube (dùng cho Theme)
+function playVideo(videoId, title, artist, cat, thumbUrl) {
+  // Dừng mp3 nếu đang phát
+  mp3Player.pause();
+  currentMode = 'yt';
+  currentVidId = videoId;
+  setTrackUI(title, artist, cat, thumbUrl);
+  if (ytPlayer && ytReady) {
+    ytPlayer.loadVideoById(videoId);
   }
 }
 
-function resetThumbForm(prefix) {
-  document.getElementById(prefix + 'ThumbUrl').value = '';
-  document.getElementById(prefix + 'ThumbPreview').innerHTML = THUMB_DEFAULTS[prefix];
-  document.getElementById(prefix + 'ThumbProgress').style.display = 'none';
-  document.getElementById(prefix + 'ThumbBar').style.width = '0%';
-  document.getElementById(prefix + 'ThumbInput').value = '';
-}
-
-// ══════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════
-async function loadData() {
-  const { data, error } = await sb.from('hieji_config').select('key, value');
-  if (error || !data) return;
-  const result = {};
-  data.forEach(row => { result[row.key] = row.value; });
-  D = {
-    profile: result.profile ?? DEFAULT_DATA.profile,
-    bg:      result.bg      ?? DEFAULT_DATA.bg,
-    music:   result.music   ?? DEFAULT_DATA.music,
-    stats:   result.stats   ?? DEFAULT_DATA.stats,
-    games:   result.games   ?? DEFAULT_DATA.games,
-    apps:    result.apps    ?? DEFAULT_DATA.apps,
-    social:  result.social  ?? DEFAULT_DATA.social,
-    videos:  result.videos  ?? DEFAULT_DATA.videos,
-  };
-}
-
-async function saveAll() {
-  const btn = document.getElementById('saveBtn');
-  const st  = document.getElementById('saveStatus');
-  btn.disabled = true;
-  st.textContent = 'Đang lưu...'; st.className = 'save-status';
-
-  const rows = [
-    { key: 'profile', value: D.profile },
-    { key: 'bg',      value: D.bg      },
-    { key: 'music',   value: D.music   },
-    { key: 'stats',   value: D.stats   },
-    { key: 'games',   value: D.games   },
-    { key: 'apps',    value: D.apps    },
-    { key: 'social',  value: D.social  },
-    { key: 'videos',  value: D.videos  },
-  ];
-
-  const { error } = await sb.from('hieji_config').upsert(rows, { onConflict: 'key' });
-  btn.disabled = false;
-  if (error) {
-    st.textContent = '❌ Lỗi lưu: ' + error.message; st.className = 'save-status error';
-  } else {
-    st.textContent = '✅ Đã lưu!'; st.className = 'save-status saved';
-    setTimeout(() => { st.textContent = 'Chưa có thay đổi'; st.className = 'save-status'; }, 2500);
-  }
-}
-
-function markChanged() {
-  const st = document.getElementById('saveStatus');
-  st.textContent = '● Có thay đổi chưa lưu'; st.className = 'save-status';
-}
-
-async function resetData() {
-  if (!confirm('Khôi phục tất cả dữ liệu mặc định? Hành động này không thể hoàn tác.')) return;
-  D = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  await saveAll();
-  renderAdmin();
-}
-
-// ══════════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════════
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
-}
-
-// ══════════════════════════════════════════════
-// RENDER LISTS
-// ══════════════════════════════════════════════
-function renderItemList(listId, category) {
-  const el = document.getElementById(listId);
-  el.innerHTML = '';
-  const items = D[category] || [];
-  if (items.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Chưa có mục nào. Thêm bên dưới.</div>';
-    return;
-  }
-  items.forEach((item, i) => {
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    const thumbHtml = item.thumb
-      ? `<img src="${item.thumb}" class="item-thumb" alt="${item.name}" onerror="this.parentElement.innerHTML='<div class=item-icon>${item.icon||'📌'}</div>'">`
-      : `<div class="item-icon">${item.icon || '📌'}</div>`;
-    row.innerHTML = `
-      ${thumbHtml}
-      <div class="item-info">
-        <div class="item-name">${item.name}</div>
-        <div class="item-url">${item.url || ''}</div>
-      </div>
-      <div class="item-actions">
-        ${i > 0 ? `<button class="btn btn-secondary btn-sm" onclick="moveItem('${category}',${i},-1)">↑</button>` : ''}
-        ${i < items.length-1 ? `<button class="btn btn-secondary btn-sm" onclick="moveItem('${category}',${i},1)">↓</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="removeItem('${category}',${i})">🗑</button>
-      </div>`;
-    el.appendChild(row);
+// Phát mp3 trực tiếp (dùng cho kết quả Search)
+function playMp3(url, title, artist, cat, thumbUrl) {
+  if (ytPlayer && ytReady) ytPlayer.stopVideo();
+  currentMode = 'mp3';
+  setTrackUI(title, artist, cat, thumbUrl);
+  mp3Player.src = url;
+  mp3Player.volume = (document.getElementById('volSlider').value / 100);
+  mp3Player.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').classList.remove('paused');
+    setLiveDot(true);
+  }).catch(() => {
+    showToast('Không phát được file này, thử bài khác nhé!');
   });
 }
 
-function addItem(category) {
-  const p = { games: 'g', apps: 'a', social: 's' }[category];
-  const name = document.getElementById(p+'Name').value.trim();
-  if (!name) { alert('Vui lòng nhập tên!'); return; }
-  const item = {
-    name,
-    icon:  document.getElementById(p+'Icon').value  || '📌',
-    desc:  document.getElementById(p+'Desc').value,
-    url:   document.getElementById(p+'Url').value,
-    color: document.getElementById(p+'Color').value || '#7c3aed',
-    thumb: document.getElementById(p+'ThumbUrl').value || ''
-  };
-  // Thêm videoUrl nếu là games hoặc apps
-  const videoEl = document.getElementById(p+'VideoUrl');
-  if (videoEl) item.videoUrl = videoEl.value.trim();
-  D[category].push(item);
-  [p+'Name', p+'Icon', p+'Desc', p+'Url', p+'Color'].forEach(id => document.getElementById(id).value = '');
-  if (videoEl) videoEl.value = '';
-  resetThumbForm(p);
-  renderListForCat(category); markChanged();
-}
-
-function removeItem(category, idx) {
-  if (!confirm('Xóa mục này?')) return;
-  D[category].splice(idx, 1);
-  renderListForCat(category); markChanged();
-}
-
-function moveItem(category, idx, dir) {
-  const arr = D[category]; const ni = idx + dir;
-  if (ni < 0 || ni >= arr.length) return;
-  [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
-  renderListForCat(category); markChanged();
-}
-
-function renderListForCat(cat) {
-  renderItemList({ games: 'gamesList', apps: 'appsList', social: 'socialList' }[cat], cat);
-}
-
-// ══════════════════════════════════════════════
-// VIDEOS
-// ══════════════════════════════════════════════
-function getYouTubeID(url) {
-  if (!url) return null;
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
-
-function previewVideoThumb() {
-  const url = document.getElementById('vUrl').value.trim();
-  const vid = getYouTubeID(url);
-  const wrap = document.getElementById('vThumbPreviewWrap');
-  const img  = document.getElementById('vThumbPreviewImg');
-  if (vid) {
-    img.src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
-    wrap.style.display = 'block';
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-function renderVideoList() {
-  const el = document.getElementById('videoList');
-  el.innerHTML = '';
-  const videos = D.videos || [];
-  if (videos.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Chưa có video nào. Thêm bên dưới.</div>';
-    return;
-  }
-  videos.forEach((v, i) => {
-    const vid = getYouTubeID(v.videoUrl);
-    const thumb = vid ? `https://img.youtube.com/vi/${vid}/default.jpg` : '';
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    row.innerHTML = `
-      ${thumb ? `<img src="${thumb}" class="item-thumb" alt="${v.title}">` : '<div class="item-icon">🎬</div>'}
-      <div class="item-info">
-        <div class="item-name">${v.title}</div>
-        <div class="item-url">${v.videoUrl || ''}</div>
-      </div>
-      <div class="item-actions">
-        ${i > 0 ? `<button class="btn btn-secondary btn-sm" onclick="moveVideo(${i},-1)">↑</button>` : ''}
-        ${i < videos.length-1 ? `<button class="btn btn-secondary btn-sm" onclick="moveVideo(${i},1)">↓</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="removeVideo(${i})">🗑</button>
-      </div>`;
-    el.appendChild(row);
-  });
-}
-
-function addVideo() {
-  const url = document.getElementById('vUrl').value.trim();
-  if (!url) { alert('Vui lòng nhập link YouTube!'); return; }
-  const title = document.getElementById('vTitle').value.trim();
-  if (!title) { alert('Vui lòng nhập tiêu đề video!'); return; }
-  const catColorMap = { Game: '#f97316', App: '#06b6d4', Tips: '#a78bfa', Review: '#f59e0b' };
-  const cat = document.getElementById('vCategory').value;
-  D.videos = D.videos || [];
-  D.videos.push({
-    title,
-    videoUrl: url,
-    desc:          document.getElementById('vDesc').value.trim(),
-    category:      cat,
-    categoryColor: document.getElementById('vCatColor').value.trim() || catColorMap[cat] || '#7c3aed',
-  });
-  ['vUrl','vTitle','vDesc','vCatColor'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('vCategory').value = '';
-  document.getElementById('vThumbPreviewWrap').style.display = 'none';
-  renderVideoList(); markChanged();
-}
-
-function removeVideo(idx) {
-  if (!confirm('Xóa video này?')) return;
-  D.videos.splice(idx, 1);
-  renderVideoList(); markChanged();
-}
-
-function moveVideo(idx, dir) {
-  const arr = D.videos; const ni = idx + dir;
-  if (ni < 0 || ni >= arr.length) return;
-  [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
-  renderVideoList(); markChanged();
-}
-
-// ══════════════════════════════════════════════
-// MUSIC
-// ══════════════════════════════════════════════
-function applyMusic() {
-  const url    = document.getElementById('musicUrl').value.trim();
-  const title  = document.getElementById('musicTitle2').value.trim() || 'Nhạc nền';
-  const source = document.getElementById('musicSource').value.trim();
-  D.music = { url, title, source };
-  updateMusicStatus(); markChanged();
-}
-function removeMusic() {
-  D.music = { url: '', title: 'Chưa có nhạc', source: '' };
-  ['musicUrl','musicTitle2','musicSource'].forEach(id => document.getElementById(id).value = '');
-  updateMusicStatus(); markChanged();
-}
-function updateMusicStatus() {
-  const m = D.music;
-  document.getElementById('musicDot').className = 'music-dot' + (m.url ? '' : ' off');
-  document.getElementById('musicStatusTitle').textContent = m.url ? (m.title || 'Nhạc đã thiết lập') : 'Chưa có nhạc';
-}
-
-// ══════════════════════════════════════════════
-// STATS
-// ══════════════════════════════════════════════
-function renderStatsEdit() {
-  const grid = document.getElementById('statsEditGrid');
-  grid.innerHTML = '';
-  (D.stats || []).forEach((s, i) => {
-    const d = document.createElement('div');
-    d.className = 'stat-edit';
-    d.innerHTML = `
-      <div class="form-group"><label>Số liệu</label><input type="text" value="${s.value}" oninput="updateStat(${i},'value',this.value)" /></div>
-      <div class="form-group"><label>Nhãn</label><input type="text" value="${s.label}" oninput="updateStat(${i},'label',this.value)" /></div>`;
-    grid.appendChild(d);
-  });
-}
-function updateStat(i, key, val) { D.stats[i][key] = val; markChanged(); }
-
-// ══════════════════════════════════════════════
-// RENDER AVATAR PANEL
-// ══════════════════════════════════════════════
-function renderAvatarPanel() {
-  const url = D.profile?.avatarUrl || '';
-  document.getElementById('avatarUrl').value = url;
-  const inner = document.getElementById('avatarPreviewInner');
-  if (url) {
-    inner.innerHTML = `<img src="${url}" alt="Avatar">`;
-  } else {
-    inner.innerHTML = 'HJ';
-  }
-}
-
-// ══════════════════════════════════════════════
-// SHOW ADMIN
-// ══════════════════════════════════════════════
-async function showAdmin() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('adminShell').style.display  = 'flex';
-  document.getElementById('loadingOverlay').classList.remove('hidden');
-  await loadData();
-  document.getElementById('loadingOverlay').classList.add('hidden');
-  if (currentUser) document.getElementById('topbarUser').textContent = '👤 ' + currentUser.email;
-  renderAdmin();
-}
-
-function renderAdmin() {
-  renderAvatarPanel();
-  renderBgPanel();
-  renderItemList('gamesList',  'games');
-  renderItemList('appsList',   'apps');
-  renderItemList('socialList', 'social');
-  renderVideoList();
-  renderStatsEdit();
-  document.getElementById('musicUrl').value    = D.music.url    || '';
-  document.getElementById('musicTitle2').value = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
-  document.getElementById('musicSource').value = D.music.source || '';
-  updateMusicStatus();
-}
-
-// ══════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  document.getElementById('loadingOverlay').classList.add('hidden');
-  if (session) {
-    currentUser = session.user;
-    showAdmin();
-  } else {
-    document.getElementById('loginScreen').style.display = 'flex';
+mp3Player.addEventListener('timeupdate', () => {
+  if (currentMode !== 'mp3') return;
+  const dur = mp3Player.duration || 0;
+  const cur = mp3Player.currentTime || 0;
+  const pct = dur > 0 ? (cur/dur)*100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('timeElapsed').textContent = fmtTime(cur);
+  document.getElementById('timeDur').textContent = fmtTime(dur);
+});
+mp3Player.addEventListener('ended', () => {
+  if (currentMode !== 'mp3') return;
+  isPlaying = false;
+  document.getElementById('playBtn').classList.add('paused');
+  setLiveDot(false);
+  if (repeat) { mp3Player.currentTime = 0; mp3Player.play(); }
+});
+mp3Player.addEventListener('pause', () => {
+  if (currentMode === 'mp3') {
+    isPlaying = false;
+    document.getElementById('playBtn').classList.add('paused');
+    setLiveDot(false);
   }
 });
+mp3Player.addEventListener('play', () => {
+  if (currentMode === 'mp3') {
+    isPlaying = true;
+    document.getElementById('playBtn').classList.remove('paused');
+    setLiveDot(true);
+  }
+});
+
+// Progress polling (cho YouTube)
+let pollInterval = null;
+function startProgressPoll() {
+  clearInterval(pollInterval);
+  pollInterval = setInterval(() => {
+    if (currentMode !== 'yt') return;
+    if (!ytPlayer || !ytPlayer.getDuration) return;
+    const dur = ytPlayer.getDuration() || 0;
+    const cur = ytPlayer.getCurrentTime() || 0;
+    const pct = dur > 0 ? (cur / dur) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('timeElapsed').textContent = fmtTime(cur);
+    document.getElementById('timeDur').textContent = fmtTime(dur);
+  }, 1000);
+}
+function fmtTime(s) {
+  if (!isFinite(s)) return '0:00';
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+function togglePlay() {
+  if (currentMode === 'mp3') {
+    if (!mp3Player.src) { showToast('Hãy chọn nhạc hoặc chủ đề bên dưới!'); return; }
+    if (isPlaying) mp3Player.pause(); else mp3Player.play();
+    return;
+  }
+  if (!ytPlayer || !ytReady) { showToast('Đang khởi tạo trình phát...'); return; }
+  if (isPlaying) ytPlayer.pauseVideo();
+  else { if (currentVidId) ytPlayer.playVideo(); else showToast('Hãy chọn nhạc hoặc chủ đề bên dưới!'); }
+}
+
+function setVolume(val) {
+  document.getElementById('volVal').textContent = val + '%';
+  if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(parseInt(val));
+  mp3Player.volume = val/100;
+}
+
+function prevTrack() {
+  if (currentMode === 'mp3') { mp3Player.currentTime = 0; return; }
+  showToast('Đang phát lại từ đầu...');
+  if (ytPlayer && ytReady) ytPlayer.seekTo(0);
+}
+function nextTrack() {
+  if (currentTheme) playRandomFromTheme(currentTheme);
+  else showToast('Chọn một chủ đề để chuyển bài kế!');
+}
+function toggleShuffle() { shuffle = !shuffle; document.getElementById('shuffleBtn').classList.toggle('active', shuffle); showToast(shuffle ? 'Bật shuffle' : 'Tắt shuffle'); }
+function toggleRepeat()  { repeat  = !repeat;  document.getElementById('repeatBtn').classList.toggle('active', repeat);   showToast(repeat  ? 'Bật lặp lại' : 'Tắt lặp lại'); }
+
+// ═══════════ THEMES (random nhiều bài / theme) ═══════════
+function renderThemes() {
+  const grid = document.getElementById('themeGrid');
+  grid.innerHTML = '';
+  THEMES.forEach(t => {
+    const btn = document.createElement('div');
+    btn.className = 'theme-btn';
+    btn.id = 'theme-' + t.id;
+    btn.innerHTML = `<div class="theme-icon">${t.icon}</div><div class="theme-name">${t.name}</div><div class="theme-desc">${t.desc}</div>`;
+    btn.onclick = () => playRandomFromTheme(t);
+    grid.appendChild(btn);
+  });
+}
+
+function playRandomFromTheme(theme) {
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('playing'));
+  const el = document.getElementById('theme-' + theme.id);
+  if (el) el.classList.add('playing');
+  currentTheme = theme;
+
+  // Chọn random 1 video khác với video đang phát (nếu có nhiều hơn 1)
+  let pool = theme.vids;
+  if (pool.length > 1 && currentVidId) {
+    pool = pool.filter(v => v !== currentVidId);
+  }
+  const vid = pool[Math.floor(Math.random() * pool.length)];
+
+  playVideo(vid, theme.name + ' Radio', 'YouTube Music', theme.icon + ' ' + theme.name, `https://img.youtube.com/vi/${vid}/mqdefault.jpg`);
+  showToast('Đang phát: ' + theme.name + ' ' + theme.icon);
+}
+
+// ═══════════ SEARCH (thật, qua Cloudflare Worker) ═══════════
+function debounceSearch(val) {
+  clearTimeout(searchTimeout);
+  if (!val || val.trim().length < 2) { document.getElementById('searchResults').classList.remove('show'); return; }
+  searchTimeout = setTimeout(() => doSearch(val.trim()), 450);
+}
+
+function handleSearchKey(e) {
+  if (e.key === 'Enter') doSearch(document.getElementById('searchInput').value.trim());
+  if (e.key === 'Escape') document.getElementById('searchResults').classList.remove('show');
+}
+
+async function doSearch(q) {
+  if (!q) return;
+  const resultsEl = document.getElementById('searchResults');
+  resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:8px"><span class="sr-loading-spin"></span> Đang tìm kiếm...</div>';
+  resultsEl.classList.add('show');
+
+  try {
+    const res = await fetch(`${WORKER_URL}/search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    if (data.error) {
+      resultsEl.innerHTML = `<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Lỗi tìm kiếm: ${escapeHtml(data.error)}</div>`;
+      return;
+    }
+
+    const results = data.results || [];
+    if (results.length === 0) {
+      resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Không tìm thấy. Thử từ khác!</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = '';
+    results.forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'search-result-item';
+      item.innerHTML = `
+        <img class="sr-thumb" src="${r.thumb}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="sr-info">
+          <div class="sr-title">${escapeHtml(r.title)}</div>
+          <div class="sr-channel">${escapeHtml(r.channel)}</div>
+        </div>`;
+      item.onclick = () => selectSearchResult(r);
+      resultsEl.appendChild(item);
+    });
+  } catch (err) {
+    resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Lỗi kết nối. Thử lại sau!</div>';
+  }
+}
+
+async function selectSearchResult(r) {
+  const resultsEl = document.getElementById('searchResults');
+  resultsEl.classList.remove('show');
+  document.getElementById('searchInput').value = '';
+  showToast('Đang tải: ' + r.title);
+  setTrackUI('Đang tải bài hát...', r.channel, '⏳', r.thumb);
+
+  try {
+    const res = await fetch(`${WORKER_URL}/?id=${encodeURIComponent(r.vid)}`);
+    const data = await res.json();
+
+    if (data.status === 'ok' && data.link) {
+      playMp3(data.link, r.title, r.channel, '🎵 Tìm kiếm', `https://img.youtube.com/vi/${r.vid}/mqdefault.jpg`);
+    } else {
+      showToast('Không lấy được file nhạc, thử bài khác!');
+    }
+  } catch (err) {
+    showToast('Lỗi tải nhạc, thử lại sau!');
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+// ═══════════ QUOTES (auto-rotate 15s + thanh tiến trình) ═══════════
+function renderQuote(fade) {
+  const q = QUOTES[quoteIdx];
+  const textEl = document.getElementById('quoteText');
+  const authorEl = document.getElementById('quoteAuthor');
+
+  if (fade) {
+    textEl.classList.add('quote-fade');
+    authorEl.classList.add('quote-fade');
+    setTimeout(() => {
+      textEl.textContent = q.text;
+      authorEl.textContent = '— ' + q.author;
+      textEl.classList.remove('quote-fade');
+      authorEl.classList.remove('quote-fade');
+    }, 250);
+  } else {
+    textEl.textContent = q.text;
+    authorEl.textContent = '— ' + q.author;
+  }
+}
+
+function nextQuote(manual) {
+  quoteIdx = (quoteIdx + 1) % QUOTES.length;
+  renderQuote(true);
+  restartQuoteAutoTimer();
+}
+
+function restartQuoteAutoTimer() {
+  clearTimeout(quoteAutoTimer);
+  clearInterval(quoteProgressTimer);
+  const fill = document.getElementById('quoteProgressFill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${QUOTE_INTERVAL}ms linear`;
+    fill.style.width = '100%';
+  });
+  quoteAutoTimer = setTimeout(() => { nextQuote(false); }, QUOTE_INTERVAL);
+}
+
+// ═══════════ TIMER ═══════════
+function setPreset(el) {
+  if (timerRunning) return;
+  document.querySelectorAll('.timer-preset').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const min = parseInt(el.dataset.min);
+  timerTotal = min * 60;
+  timerLeft = timerTotal;
+  document.getElementById('customMin').value = min;
+  document.getElementById('customSec').value = 0;
+  updateTimerDisplay();
+}
+
+function getCustomTime() {
+  const m = parseInt(document.getElementById('customMin').value) || 0;
+  const s = parseInt(document.getElementById('customSec').value) || 0;
+  return m * 60 + s;
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  const t = getCustomTime();
+  if (t <= 0) { showToast('Hãy đặt thời gian trước!'); return; }
+  timerTotal = t;
+  timerLeft = t;
+  timerRunning = true;
+  document.getElementById('timerStartBtn').disabled = true;
+  document.getElementById('timerPauseBtn').disabled = false;
+  document.getElementById('timerModeLabel').textContent = 'TẬP TRUNG';
+  document.getElementById('timerLabel').textContent = 'Đang đếm ngược...';
+  showToast('Đồng hồ bắt đầu! Tập trung nào 💪');
+  timerInterval = setInterval(tickTimer, 1000);
+}
+
+function pauseTimer() {
+  if (!timerRunning) return;
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timerStartBtn').disabled = false;
+  document.getElementById('timerPauseBtn').disabled = true;
+  document.getElementById('timerModeLabel').textContent = 'TẠM DỪNG';
+  document.getElementById('timerLabel').textContent = 'Đã tạm dừng';
+  document.getElementById('timerStartBtn').textContent = '▶ TIẾP TỤC';
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerLeft = getCustomTime();
+  if (timerLeft <= 0) timerLeft = 25*60;
+  timerTotal = timerLeft;
+  document.getElementById('timerStartBtn').disabled = false;
+  document.getElementById('timerPauseBtn').disabled = true;
+  document.getElementById('timerStartBtn').textContent = '▶ BẮT ĐẦU';
+  document.getElementById('timerModeLabel').textContent = 'SẴN SÀNG';
+  document.getElementById('timerLabel').textContent = 'Đặt thời gian rồi bắt đầu';
+  updateTimerDisplay();
+}
+
+function tickTimer() {
+  if (timerLeft <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timerModeLabel').textContent = 'XONG!';
+    document.getElementById('timerLabel').textContent = 'Hết giờ! Nghỉ ngơi nha 🎉';
+    document.getElementById('timerStartBtn').disabled = false;
+    document.getElementById('timerPauseBtn').disabled = true;
+    document.getElementById('timerStartBtn').textContent = '▶ BẮT ĐẦU LẠI';
+    showBreak();
+    return;
+  }
+  timerLeft--;
+  updateTimerDisplay();
+  if (timerLeft === 60) showToast('Còn 1 phút nữa! Cố lên 💪');
+  if (timerLeft === 300) showToast('Còn 5 phút!');
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerLeft / 60);
+  const s = timerLeft % 60;
+  document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const pct = timerTotal > 0 ? timerLeft / timerTotal : 1;
+  const circumference = 2 * Math.PI * 54;
+  const offset = circumference * (1 - pct);
+  document.getElementById('timerCircle').style.strokeDashoffset = offset;
+}
+
+// ═══════════ BREAK OVERLAY ═══════════
+const BREAK_MSGS = [
+  { icon: '💧', title: 'Uống nước đi!', msg: 'Uống 1 ly nước lớn. Não bộ cần nước để hoạt động tốt. Bạn đã làm việc tuyệt vời!' },
+  { icon: '🧘', title: 'Duỗi người nào!', msg: 'Đứng dậy, duỗi tay chân, xoay cổ. 5 phút vận động nhẹ sẽ giúp bạn tập trung tốt hơn ở hiệp sau.' },
+  { icon: '👀', title: 'Nghỉ mắt!', msg: 'Nhìn xa 20 giây để mắt nghỉ ngơi (quy tắc 20-20-20). Bạn đã rất tập trung, xứng đáng được nghỉ!' },
+  { icon: '🎉', title: 'Tuyệt vời!', msg: 'Hoàn thành một hiệp học! Bạn đang xây dựng thói quen tuyệt vời. Nghỉ 5–10 phút rồi tiếp tục nhé!' },
+  { icon: '🌟', title: 'Thành công!', msg: 'Mỗi phút tập trung là đầu tư cho tương lai. Hãy nghỉ ngơi xứng đáng, rồi ta chinh phục hiệp tiếp theo!' },
+];
+
+function showBreak() {
+  const b = BREAK_MSGS[Math.floor(Math.random() * BREAK_MSGS.length)];
+  document.getElementById('breakIcon').textContent = b.icon;
+  document.getElementById('breakTitle').textContent = b.title;
+  document.getElementById('breakMsg').textContent = b.msg;
+  document.getElementById('breakOverlay').classList.add('show');
+}
+
+function closeBreak() {
+  document.getElementById('breakOverlay').classList.remove('show');
+  resetTimer();
+}
+
+// ═══════════ TOAST ═══════════
+let toastTimeout = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════ PARTICLES ═══════════
+function spawnParticles() {
+  const c = document.getElementById('particles');
+  const colors = ['#7c3aed','#06b6d4','#f0abfc'];
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `left:${Math.random()*100}%;animation-duration:${7+Math.random()*10}s;animation-delay:${Math.random()*10}s;background:${colors[Math.floor(Math.random()*3)]};width:${1+Math.random()*2}px;height:${1+Math.random()*2}px`;
+    c.appendChild(p);
+  }
+}
+
+// ═══════════ CLOSE SEARCH ON OUTSIDE CLICK ═══════════
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('searchResults').classList.remove('show');
+  }
+});
+
+// ═══════════ CUSTOM TIME INPUT CHANGE ═══════════
+document.getElementById('customMin').addEventListener('input', function() {
+  if (!timerRunning) { timerLeft = getCustomTime(); timerTotal = timerLeft; updateTimerDisplay(); }
+});
+document.getElementById('customSec').addEventListener('input', function() {
+  if (!timerRunning) { timerLeft = getCustomTime(); timerTotal = timerLeft; updateTimerDisplay(); }
+});
+
+// ═══════════ INIT ═══════════
+spawnParticles();
+renderThemes();
+renderQuote(false);
+restartQuoteAutoTimer();
+updateTimerDisplay();
+document.getElementById('timerCircle').style.strokeDasharray = (2 * Math.PI * 54).toFixed(1);
 </script>
 </body>
 </html>
