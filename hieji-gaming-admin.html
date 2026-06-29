@@ -17,7 +17,7 @@
   }
   body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* ── LOGIN ── */
+  /* LOGIN */
   #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; padding: 2rem; }
   .login-logo { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; }
   .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; }
@@ -44,7 +44,7 @@
   .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
   .err-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none; }
 
-  /* ── ADMIN SHELL ── */
+  /* ADMIN SHELL */
   #adminShell { display: none; min-height: 100vh; flex-direction: column; }
   .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
   .topbar-logo { font-family: 'Orbitron', monospace; font-size: 0.9rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
@@ -55,52 +55,98 @@
   .save-status.saved { color: #22c55e; }
   .save-status.error { color: var(--danger); }
 
-  /* ── TABS ── */
+  /* TABS */
   .tabs { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; overflow-x: auto; }
   .tab { padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; user-select: none; }
   .tab.active { color: var(--c1); border-color: var(--c1); }
 
-  /* ── CONTENT ── */
+  /* CONTENT */
   .content { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
   .panel { display: none; }
   .panel.active { display: block; }
   .panel-title { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; }
 
-  /* ── CARD ── */
+  /* CARD */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
   .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .card-header h3 { font-size: 1rem; font-weight: 600; }
 
-  /* ── ITEM LIST ── */
+  /* ITEM LIST */
   .item-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
   .item-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; }
-  .item-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .item-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .item-icon { font-size: 1.4rem; flex-shrink: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
   .item-info { flex: 1; min-width: 0; }
   .item-name { font-weight: 600; font-size: 0.95rem; }
   .item-url { font-size: 0.75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .item-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
 
-  /* ── ADD FORM ── */
+  /* ADD FORM */
   .add-form { background: rgba(124,58,237,0.06); border: 1px dashed rgba(124,58,237,0.3); border-radius: 10px; padding: 1rem; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
   @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
 
-  /* ── MUSIC ── */
+  /* MUSIC */
   .music-status { display: flex; align-items: center; gap: 0.75rem; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
   .music-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
   .music-dot.off { background: var(--muted); }
 
-  /* ── STATS ── */
+  /* STATS */
   .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
   @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
   .stat-edit { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
   .stat-edit input { margin-bottom: 0.5rem; }
 
-  /* ── LOADING OVERLAY ── */
+  /* AVATAR UPLOAD */
+  .avatar-upload-area {
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    background: rgba(124,58,237,0.06); border: 2px dashed rgba(124,58,237,0.3);
+    border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .avatar-upload-area:hover { border-color: var(--c1); background: rgba(124,58,237,0.1); }
+  .avatar-upload-area.drag-over { border-color: var(--c2); background: rgba(6,182,212,0.1); }
+  .avatar-preview-wrap {
+    width: 96px; height: 96px; border-radius: 50%; padding: 3px;
+    background: linear-gradient(135deg, var(--c1), var(--c2), #f0abfc);
+    flex-shrink: 0;
+  }
+  .avatar-preview-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #1a0a2e;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900;
+    color: #fff; overflow: hidden;
+  }
+  .avatar-preview-inner img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .upload-hint { font-size: 0.85rem; color: var(--muted); text-align: center; }
+  .upload-hint strong { color: var(--c1); }
+
+  /* THUMBNAIL UPLOAD in add form */
+  .thumb-upload-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .thumb-preview {
+    width: 56px; height: 56px; border-radius: 10px; border: 1px dashed var(--border);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: rgba(255,255,255,0.03); overflow: hidden; font-size: 1.5rem;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .thumb-preview:hover { border-color: var(--c1); }
+  .thumb-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+  .thumb-upload-info { flex: 1; font-size: 0.8rem; color: var(--muted); }
+  .thumb-upload-info strong { color: var(--c1); display: block; font-size: 0.85rem; }
+  .upload-progress {
+    height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; margin-top: 0.4rem;
+  }
+  .upload-progress-bar { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); width: 0%; transition: width 0.3s; border-radius: 99px; }
+
+  /* LOADING OVERLAY */
   #loadingOverlay { position: fixed; inset: 0; background: rgba(9,9,15,0.8); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
   #loadingOverlay.hidden { display: none; }
   .spinner { width: 40px; height: 40px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--c1); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* HIDDEN FILE INPUT */
+  input[type=file] { display: none; }
 </style>
 </head>
 <body>
@@ -146,7 +192,8 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('music',this)">🎵 Nhạc</div>
+    <div class="tab active" onclick="switchTab('profile',this)">👤 Profile</div>
+    <div class="tab" onclick="switchTab('music',this)">🎵 Nhạc</div>
     <div class="tab" onclick="switchTab('games',this)">🎮 Game</div>
     <div class="tab" onclick="switchTab('apps',this)">📱 App</div>
     <div class="tab" onclick="switchTab('social',this)">🔗 Mạng xã hội</div>
@@ -156,8 +203,48 @@
 
   <div class="content">
 
+    <!-- PROFILE / AVATAR -->
+    <div id="panel-profile" class="panel active">
+      <div class="panel-title">👤 Ảnh đại diện</div>
+      <div class="card">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Ảnh này sẽ thay thế chữ "HJ" trên trang bio. Khuyến nghị ảnh vuông, tối thiểu 200×200px.</p>
+
+        <!-- Drop zone -->
+        <div class="avatar-upload-area" id="avatarDropZone"
+             onclick="document.getElementById('avatarFileInput').click()"
+             ondragover="avatarDragOver(event)" ondragleave="avatarDragLeave(event)" ondrop="avatarDrop(event)">
+          <div class="avatar-preview-wrap">
+            <div class="avatar-preview-inner" id="avatarPreviewInner">HJ</div>
+          </div>
+          <div class="upload-hint">
+            <strong>Bấm hoặc kéo thả ảnh vào đây</strong>
+            Hỗ trợ JPG, PNG, WEBP · Tối đa 5MB
+          </div>
+        </div>
+        <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarFile(this.files[0])">
+
+        <!-- Progress -->
+        <div id="avatarProgressWrap" style="display:none;margin-bottom:1rem">
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem" id="avatarProgressLabel">Đang tải lên...</div>
+          <div class="upload-progress"><div class="upload-progress-bar" id="avatarProgressBar"></div></div>
+        </div>
+
+        <!-- Current URL -->
+        <div class="form-group">
+          <label>URL ảnh hiện tại</label>
+          <input type="url" id="avatarUrl" placeholder="https://... (tự động điền sau khi upload)" readonly
+                 style="cursor:default;opacity:.7" />
+        </div>
+
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
+          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('avatarFileInput').click()">📷 Chọn ảnh</button>
+          <button class="btn btn-danger" onclick="removeAvatar()">🗑 Xóa ảnh (dùng chữ HJ)</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MUSIC -->
-    <div id="panel-music" class="panel active">
+    <div id="panel-music" class="panel">
       <div class="panel-title">🎵 Nhạc nền</div>
       <div class="card">
         <div id="musicStatus" class="music-status">
@@ -187,6 +274,20 @@
         <div class="item-list" id="gamesList"></div>
         <div class="add-form">
           <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm game mới</div>
+
+          <!-- Thumbnail upload -->
+          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
+          <div class="thumb-upload-row">
+            <div class="thumb-preview" id="gThumbPreview" onclick="document.getElementById('gThumbInput').click()">🎮</div>
+            <div class="thumb-upload-info">
+              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
+              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
+              <div class="upload-progress" id="gThumbProgress" style="display:none"><div class="upload-progress-bar" id="gThumbBar"></div></div>
+            </div>
+          </div>
+          <input type="file" id="gThumbInput" accept="image/*" onchange="handleThumbFile('g',this.files[0])">
+          <input type="hidden" id="gThumbUrl" />
+
           <div class="form-row">
             <div class="form-group"><label>Tên game</label><input type="text" id="gName" placeholder="Tên game" /></div>
             <div class="form-group"><label>Icon (emoji)</label><input type="text" id="gIcon" placeholder="🎮" maxlength="4" /></div>
@@ -209,6 +310,20 @@
         <div class="item-list" id="appsList"></div>
         <div class="add-form">
           <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm ứng dụng mới</div>
+
+          <!-- Thumbnail upload -->
+          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
+          <div class="thumb-upload-row">
+            <div class="thumb-preview" id="aThumbPreview" onclick="document.getElementById('aThumbInput').click()">📱</div>
+            <div class="thumb-upload-info">
+              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
+              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
+              <div class="upload-progress" id="aThumbProgress" style="display:none"><div class="upload-progress-bar" id="aThumbBar"></div></div>
+            </div>
+          </div>
+          <input type="file" id="aThumbInput" accept="image/*" onchange="handleThumbFile('a',this.files[0])">
+          <input type="hidden" id="aThumbUrl" />
+
           <div class="form-row">
             <div class="form-group"><label>Tên app</label><input type="text" id="aName" placeholder="Tên ứng dụng" /></div>
             <div class="form-group"><label>Icon (emoji)</label><input type="text" id="aIcon" placeholder="📱" maxlength="4" /></div>
@@ -231,6 +346,20 @@
         <div class="item-list" id="socialList"></div>
         <div class="add-form">
           <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm mạng xã hội</div>
+
+          <!-- Thumbnail upload -->
+          <label style="margin-bottom:.5rem">Thumbnail (ảnh)</label>
+          <div class="thumb-upload-row">
+            <div class="thumb-preview" id="sThumbPreview" onclick="document.getElementById('sThumbInput').click()">🔗</div>
+            <div class="thumb-upload-info">
+              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
+              JPG / PNG / WEBP · Tối đa 3MB. Nếu không chọn, sẽ dùng emoji icon.
+              <div class="upload-progress" id="sThumbProgress" style="display:none"><div class="upload-progress-bar" id="sThumbBar"></div></div>
+            </div>
+          </div>
+          <input type="file" id="sThumbInput" accept="image/*" onchange="handleThumbFile('s',this.files[0])">
+          <input type="hidden" id="sThumbUrl" />
+
           <div class="form-row">
             <div class="form-group"><label>Tên nền tảng</label><input type="text" id="sName" placeholder="YouTube" /></div>
             <div class="form-group"><label>Icon (emoji)</label><input type="text" id="sIcon" placeholder="▶️" maxlength="4" /></div>
@@ -275,15 +404,17 @@
 
 <script>
 // ══════════════════════════════════════════════
-// ⚙️  CẤU HÌNH SUPABASE — điền vào đây
+// ⚙️  CẤU HÌNH SUPABASE
 // ══════════════════════════════════════════════
-const SUPABASE_URL     = 'https://iivwsnbhkffxvmccktuj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdndzbmJoa2ZmeHZtY2NrdHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTY3NDEsImV4cCI6MjA5ODI3Mjc0MX0.EPfaIbHGMDiZJyK6XKtt-iKu6Ip22AY7hFpKom1PzuA'; // anon/public key
+const SUPABASE_URL      = 'https://iivwsnbhkffxvmccktuj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdndzbmJoa2ZmeHZtY2NrdHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTY3NDEsImV4cCI6MjA5ODI3Mjc0MX0.EPfaIbHGMDiZJyK6XKtt-iKu6Ip22AY7hFpKom1PzuA';
+const STORAGE_BUCKET    = 'hieji-images';
 // ══════════════════════════════════════════════
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEFAULT_DATA = {
+  profile: { avatarUrl: '' },
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
@@ -291,77 +422,178 @@ const DEFAULT_DATA = {
     { label: 'Games', value: '50+' }
   ],
   games: [
-    { name: 'Free Fire', desc: 'Battle Royale - Review & Gameplay', url: '#', icon: '🔥', color: '#f97316' },
-    { name: 'Mobile Legends', desc: 'MOBA - Tips & Tricks', url: '#', icon: '⚔️', color: '#7c3aed' }
+    { name: 'Free Fire', desc: 'Battle Royale - Review & Gameplay', url: '#', icon: '🔥', color: '#f97316', thumb: '' },
+    { name: 'Mobile Legends', desc: 'MOBA - Tips & Tricks', url: '#', icon: '⚔️', color: '#7c3aed', thumb: '' }
   ],
   apps: [
-    { name: 'GameBooster Pro', desc: 'Tối ưu hiệu suất gaming', url: '#', icon: '⚡', color: '#06b6d4' }
+    { name: 'GameBooster Pro', desc: 'Tối ưu hiệu suất gaming', url: '#', icon: '⚡', color: '#06b6d4', thumb: '' }
   ],
   social: [
-    { name: 'YouTube', desc: 'Subscribe kênh HieJi Gaming', url: 'https://youtube.com', icon: '▶️', color: '#ef4444' },
-    { name: 'Facebook', desc: 'Trang chính thức', url: 'https://facebook.com', icon: '💬', color: '#3b82f6' },
-    { name: 'TikTok', desc: 'Clip gaming ngắn', url: 'https://tiktok.com', icon: '🎵', color: '#ec4899' }
+    { name: 'YouTube', desc: 'Subscribe kênh HieJi Gaming', url: 'https://youtube.com', icon: '▶️', color: '#ef4444', thumb: '' },
+    { name: 'Facebook', desc: 'Trang chính thức', url: 'https://facebook.com', icon: '💬', color: '#3b82f6', thumb: '' },
+    { name: 'TikTok', desc: 'Clip gaming ngắn', url: 'https://tiktok.com', icon: '🎵', color: '#ec4899', thumb: '' }
   ]
 };
 
 let D = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let currentUser = null;
 
-// ── AUTH ──
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
 async function doLogin() {
   const email = document.getElementById('uEmail').value.trim();
   const pass  = document.getElementById('uPass').value;
   const errEl = document.getElementById('loginErr');
   const btn   = document.getElementById('loginBtn');
   errEl.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Đang đăng nhập...';
-
+  btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.disabled = false;
-  btn.textContent = 'Đăng nhập';
-
-  if (error) {
-    errEl.textContent = 'Email hoặc mật khẩu không đúng';
-    errEl.style.display = 'block';
-    return;
-  }
+  btn.disabled = false; btn.textContent = 'Đăng nhập';
+  if (error) { errEl.textContent = 'Email hoặc mật khẩu không đúng'; errEl.style.display = 'block'; return; }
   currentUser = data.user;
   showAdmin();
 }
 
-async function doLogout() {
-  await sb.auth.signOut();
-  location.reload();
-}
+async function doLogout() { await sb.auth.signOut(); location.reload(); }
 
 async function changePassword() {
   const np = document.getElementById('newPwd').value;
   const msg = document.getElementById('pwdMsg');
-  if (np.length < 6) {
-    msg.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
-    msg.style.display = 'block'; return;
-  }
+  if (np.length < 6) { msg.textContent = 'Mật khẩu phải có ít nhất 6 ký tự'; msg.style.display = 'block'; return; }
   const { error } = await sb.auth.updateUser({ password: np });
   if (error) { msg.textContent = 'Lỗi: ' + error.message; msg.style.display = 'block'; return; }
-  msg.style.color = '#22c55e';
-  msg.textContent = '✅ Đổi mật khẩu thành công!';
-  msg.style.display = 'block';
+  msg.style.color = '#22c55e'; msg.textContent = '✅ Đổi mật khẩu thành công!'; msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; msg.style.color = ''; }, 3000);
 }
 
-// ── DATA ──
+// ══════════════════════════════════════════════
+// STORAGE UPLOAD
+// ══════════════════════════════════════════════
+async function uploadImage(file, folder, progressBarId) {
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+  // Fake progress animation while uploading
+  const bar = document.getElementById(progressBarId);
+  let fakeP = 0;
+  const fakeTimer = setInterval(() => { fakeP = Math.min(fakeP + 8, 85); if (bar) bar.style.width = fakeP + '%'; }, 120);
+
+  const { data, error } = await sb.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  clearInterval(fakeTimer);
+  if (bar) bar.style.width = '100%';
+
+  if (error) throw new Error(error.message);
+
+  const { data: urlData } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return urlData.publicUrl;
+}
+
+// ══════════════════════════════════════════════
+// AVATAR UPLOAD
+// ══════════════════════════════════════════════
+function avatarDragOver(e) { e.preventDefault(); document.getElementById('avatarDropZone').classList.add('drag-over'); }
+function avatarDragLeave()  { document.getElementById('avatarDropZone').classList.remove('drag-over'); }
+function avatarDrop(e)      { e.preventDefault(); avatarDragLeave(); const f = e.dataTransfer.files[0]; if (f) handleAvatarFile(f); }
+
+async function handleAvatarFile(file) {
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 5MB.'); return; }
+  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
+
+  // Show local preview instantly
+  const reader = new FileReader();
+  reader.onload = e => {
+    const inner = document.getElementById('avatarPreviewInner');
+    inner.innerHTML = `<img src="${e.target.result}" alt="Avatar preview">`;
+  };
+  reader.readAsDataURL(file);
+
+  // Upload to Supabase Storage
+  const progressWrap = document.getElementById('avatarProgressWrap');
+  const progressLabel = document.getElementById('avatarProgressLabel');
+  progressWrap.style.display = 'block';
+  progressLabel.textContent = 'Đang tải lên...';
+
+  try {
+    const url = await uploadImage(file, 'avatars', 'avatarProgressBar');
+    D.profile.avatarUrl = url;
+    document.getElementById('avatarUrl').value = url;
+    progressLabel.textContent = '✅ Tải lên thành công!';
+    progressLabel.style.color = '#22c55e';
+    markChanged();
+    setTimeout(() => { progressWrap.style.display = 'none'; progressLabel.style.color = ''; }, 2500);
+  } catch (err) {
+    progressLabel.textContent = '❌ Lỗi: ' + err.message;
+    progressLabel.style.color = 'var(--danger)';
+  }
+}
+
+function removeAvatar() {
+  D.profile.avatarUrl = '';
+  document.getElementById('avatarUrl').value = '';
+  document.getElementById('avatarPreviewInner').innerHTML = 'HJ';
+  markChanged();
+}
+
+// ══════════════════════════════════════════════
+// THUMBNAIL UPLOAD (game / app / social)
+// ══════════════════════════════════════════════
+const THUMB_DEFAULTS = { g: '🎮', a: '📱', s: '🔗' };
+
+async function handleThumbFile(prefix, file) {
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 3MB.'); return; }
+  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
+
+  // Local preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(prefix + 'ThumbPreview');
+    prev.innerHTML = `<img src="${e.target.result}" alt="thumb">`;
+  };
+  reader.readAsDataURL(file);
+
+  // Show progress
+  const prog = document.getElementById(prefix + 'ThumbProgress');
+  prog.style.display = 'block';
+
+  try {
+    const url = await uploadImage(file, 'thumbnails', prefix + 'ThumbBar');
+    document.getElementById(prefix + 'ThumbUrl').value = url;
+    setTimeout(() => { prog.style.display = 'none'; }, 1800);
+  } catch (err) {
+    alert('Lỗi upload thumbnail: ' + err.message);
+    prog.style.display = 'none';
+  }
+}
+
+function resetThumbForm(prefix) {
+  document.getElementById(prefix + 'ThumbUrl').value = '';
+  document.getElementById(prefix + 'ThumbPreview').innerHTML = THUMB_DEFAULTS[prefix];
+  document.getElementById(prefix + 'ThumbProgress').style.display = 'none';
+  document.getElementById(prefix + 'ThumbBar').style.width = '0%';
+  document.getElementById(prefix + 'ThumbInput').value = '';
+}
+
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
 async function loadData() {
   const { data, error } = await sb.from('hieji_config').select('key, value');
   if (error || !data) return;
   const result = {};
   data.forEach(row => { result[row.key] = row.value; });
   D = {
-    music:  result.music  ?? DEFAULT_DATA.music,
-    stats:  result.stats  ?? DEFAULT_DATA.stats,
-    games:  result.games  ?? DEFAULT_DATA.games,
-    apps:   result.apps   ?? DEFAULT_DATA.apps,
-    social: result.social ?? DEFAULT_DATA.social,
+    profile: result.profile ?? DEFAULT_DATA.profile,
+    music:   result.music   ?? DEFAULT_DATA.music,
+    stats:   result.stats   ?? DEFAULT_DATA.stats,
+    games:   result.games   ?? DEFAULT_DATA.games,
+    apps:    result.apps    ?? DEFAULT_DATA.apps,
+    social:  result.social  ?? DEFAULT_DATA.social,
   };
 }
 
@@ -371,17 +603,16 @@ async function saveAll() {
   btn.disabled = true;
   st.textContent = 'Đang lưu...'; st.className = 'save-status';
 
-  // Upsert từng key một vào bảng hieji_config
   const rows = [
-    { key: 'music',  value: D.music  },
-    { key: 'stats',  value: D.stats  },
-    { key: 'games',  value: D.games  },
-    { key: 'apps',   value: D.apps   },
-    { key: 'social', value: D.social },
+    { key: 'profile', value: D.profile },
+    { key: 'music',   value: D.music   },
+    { key: 'stats',   value: D.stats   },
+    { key: 'games',   value: D.games   },
+    { key: 'apps',    value: D.apps    },
+    { key: 'social',  value: D.social  },
   ];
 
   const { error } = await sb.from('hieji_config').upsert(rows, { onConflict: 'key' });
-
   btn.disabled = false;
   if (error) {
     st.textContent = '❌ Lỗi lưu: ' + error.message; st.className = 'save-status error';
@@ -403,7 +634,9 @@ async function resetData() {
   renderAdmin();
 }
 
-// ── TABS ──
+// ══════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════
 function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -411,7 +644,9 @@ function switchTab(name, el) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// ── RENDER LISTS ──
+// ══════════════════════════════════════════════
+// RENDER LISTS
+// ══════════════════════════════════════════════
 function renderItemList(listId, category) {
   const el = document.getElementById(listId);
   el.innerHTML = '';
@@ -423,8 +658,11 @@ function renderItemList(listId, category) {
   items.forEach((item, i) => {
     const row = document.createElement('div');
     row.className = 'item-row';
+    const thumbHtml = item.thumb
+      ? `<img src="${item.thumb}" class="item-thumb" alt="${item.name}" onerror="this.parentElement.innerHTML='<div class=item-icon>${item.icon||'📌'}</div>'">`
+      : `<div class="item-icon">${item.icon || '📌'}</div>`;
     row.innerHTML = `
-      <div class="item-icon">${item.icon || '📌'}</div>
+      ${thumbHtml}
       <div class="item-info">
         <div class="item-name">${item.name}</div>
         <div class="item-url">${item.url || ''}</div>
@@ -443,12 +681,15 @@ function addItem(category) {
   const name = document.getElementById(p+'Name').value.trim();
   if (!name) { alert('Vui lòng nhập tên!'); return; }
   D[category].push({
-    name, icon: document.getElementById(p+'Icon').value || '📌',
-    desc: document.getElementById(p+'Desc').value,
-    url:  document.getElementById(p+'Url').value,
-    color: document.getElementById(p+'Color').value || '#7c3aed'
+    name,
+    icon:  document.getElementById(p+'Icon').value  || '📌',
+    desc:  document.getElementById(p+'Desc').value,
+    url:   document.getElementById(p+'Url').value,
+    color: document.getElementById(p+'Color').value || '#7c3aed',
+    thumb: document.getElementById(p+'ThumbUrl').value || ''
   });
   [p+'Name', p+'Icon', p+'Desc', p+'Url', p+'Color'].forEach(id => document.getElementById(id).value = '');
+  resetThumbForm(p);
   renderListForCat(category); markChanged();
 }
 
@@ -469,7 +710,9 @@ function renderListForCat(cat) {
   renderItemList({ games: 'gamesList', apps: 'appsList', social: 'socialList' }[cat], cat);
 }
 
-// ── MUSIC ──
+// ══════════════════════════════════════════════
+// MUSIC
+// ══════════════════════════════════════════════
 function applyMusic() {
   const url    = document.getElementById('musicUrl').value.trim();
   const title  = document.getElementById('musicTitle2').value.trim() || 'Nhạc nền';
@@ -488,7 +731,9 @@ function updateMusicStatus() {
   document.getElementById('musicStatusTitle').textContent = m.url ? (m.title || 'Nhạc đã thiết lập') : 'Chưa có nhạc';
 }
 
-// ── STATS ──
+// ══════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════
 function renderStatsEdit() {
   const grid = document.getElementById('statsEditGrid');
   grid.innerHTML = '';
@@ -503,35 +748,51 @@ function renderStatsEdit() {
 }
 function updateStat(i, key, val) { D.stats[i][key] = val; markChanged(); }
 
-// ── SHOW ADMIN ──
+// ══════════════════════════════════════════════
+// RENDER AVATAR PANEL
+// ══════════════════════════════════════════════
+function renderAvatarPanel() {
+  const url = D.profile?.avatarUrl || '';
+  document.getElementById('avatarUrl').value = url;
+  const inner = document.getElementById('avatarPreviewInner');
+  if (url) {
+    inner.innerHTML = `<img src="${url}" alt="Avatar">`;
+  } else {
+    inner.innerHTML = 'HJ';
+  }
+}
+
+// ══════════════════════════════════════════════
+// SHOW ADMIN
+// ══════════════════════════════════════════════
 async function showAdmin() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminShell').style.display  = 'flex';
   document.getElementById('loadingOverlay').classList.remove('hidden');
-
   await loadData();
   document.getElementById('loadingOverlay').classList.add('hidden');
-
   if (currentUser) document.getElementById('topbarUser').textContent = '👤 ' + currentUser.email;
   renderAdmin();
 }
 
 function renderAdmin() {
+  renderAvatarPanel();
   renderItemList('gamesList',  'games');
   renderItemList('appsList',   'apps');
   renderItemList('socialList', 'social');
   renderStatsEdit();
-  document.getElementById('musicUrl').value     = D.music.url    || '';
-  document.getElementById('musicTitle2').value  = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
-  document.getElementById('musicSource').value  = D.music.source || '';
+  document.getElementById('musicUrl').value    = D.music.url    || '';
+  document.getElementById('musicTitle2').value = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
+  document.getElementById('musicSource').value = D.music.source || '';
   updateMusicStatus();
 }
 
-// ── INIT ──
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await sb.auth.getSession();
   document.getElementById('loadingOverlay').classList.add('hidden');
-
   if (session) {
     currentUser = session.user;
     showAdmin();
