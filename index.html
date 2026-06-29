@@ -116,16 +116,24 @@
   .video-title { font-size: 0.95rem; font-weight: 600; line-height: 1.3; margin-bottom: 2px; }
   .video-sub { font-size: 0.78rem; color: var(--muted); }
 
-  /* VIDEO MODAL */
-  #videoModal { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(8px); }
-  #videoModal.open { display: flex; }
-  .modal-box { width: 100%; max-width: 560px; background: #0f0f1a; border: 1px solid rgba(124,58,237,0.4); border-radius: 16px; overflow: hidden; }
-  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-  .modal-title { font-size: 0.95rem; font-weight: 600; flex: 1; margin-right: 0.5rem; }
+  /* ITEM MODAL (video + link tải) */
+  #itemModal { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(8px); }
+  #itemModal.open { display: flex; }
+  .modal-box { width: 100%; max-width: 420px; background: #0f0f1a; border: 1px solid rgba(124,58,237,0.4); border-radius: 20px; overflow: hidden; }
+  .modal-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .modal-icon { width: 42px; height: 42px; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+  .modal-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+  .modal-title { font-size: 1rem; font-weight: 700; flex: 1; }
+  .modal-sub { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
   .modal-close { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.07); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.1rem; flex-shrink: 0; transition: background 0.2s; }
   .modal-close:hover { background: rgba(255,255,255,0.14); }
-  .modal-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
-  .modal-embed iframe { width: 100%; height: 100%; border: none; display: block; }
+  .modal-video-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+  .modal-video-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+  .modal-no-video { display: flex; align-items: center; justify-content: center; aspect-ratio: 16/9; background: rgba(255,255,255,0.03); color: var(--muted); font-size: 0.85rem; }
+  .modal-footer { padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .modal-download-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border-radius: 12px; background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; font-family: 'Orbitron', monospace; font-size: 0.82rem; font-weight: 700; letter-spacing: 2px; text-decoration: none; transition: opacity 0.2s, transform 0.15s; }
+  .modal-download-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .modal-download-btn svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
 
   /* FOOTER */
   .footer { font-size: 0.75rem; color: rgba(255,255,255,0.2); text-align: center; margin-top: auto; padding-top: 2rem; letter-spacing: 2px; text-transform: uppercase; }
@@ -226,24 +234,29 @@
   <div class="section-label" style="width:100%;max-width:400px">🔗 Mạng xã hội</div>
   <div class="links-wrap" id="socialWrap"></div>
 
-  <!-- VIDEO TUTORIALS -->
-  <div id="videoSection" style="display:none;width:100%;max-width:400px">
-    <div class="section-label">🎬 Video hướng dẫn</div>
-    <div class="video-grid" id="videoGrid"></div>
-  </div>
+  <!-- VIDEO TUTORIALS section ẩn đi, không dùng nữa -->
+  <div id="videoSection" style="display:none"></div>
 
   <div class="footer">HieJi Gaming © 2025</div>
 </div>
 
-<!-- VIDEO MODAL -->
-<div id="videoModal" onclick="closeVideoModal(event)">
+<!-- ITEM MODAL: video hướng dẫn + link tải -->
+<div id="itemModal" onclick="closeItemModal(event)">
   <div class="modal-box">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Video hướng dẫn</div>
-      <button class="modal-close" onclick="closeVideoModal()">&#x2715;</button>
+      <div class="modal-icon" id="modalIcon"></div>
+      <div style="flex:1;min-width:0">
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeItemModal()">&#x2715;</button>
     </div>
-    <div class="modal-embed">
-      <iframe id="modalIframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    <div id="modalVideoWrap"></div>
+    <div class="modal-footer">
+      <a id="modalDownloadBtn" href="#" target="_blank" class="modal-download-btn">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        TẢI / MỞ LINK
+      </a>
     </div>
   </div>
 </div>
@@ -352,30 +365,28 @@ function renderLinks(containerId, items) {
     wrap.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Chưa có mục nào</div>';
     return;
   }
+  // games và apps → mở modal; social → mở link thẳng
+  const useModal = (containerId === 'gamesWrap' || containerId === 'appsWrap');
   items.forEach(item => {
-    const outer = document.createElement('div');
-    outer.style.cssText = 'display:flex;flex-direction:column;gap:0';
-
     const a = document.createElement('a');
-    a.href = item.url || '#';
-    if (item.url && item.url !== '#') a.target = '_blank';
+    if (useModal) {
+      a.href = '#';
+      a.onclick = (e) => { e.preventDefault(); openItemModal(item); };
+    } else {
+      a.href = item.url || '#';
+      if (item.url && item.url !== '#') a.target = '_blank';
+    }
     a.className = 'link-card';
 
     const iconHtml = item.thumb
       ? `<div class="link-icon"><img src="${item.thumb}" alt="${item.name}" onerror="this.parentElement.innerHTML='${item.icon||'📌'}'"></div>`
       : `<div class="link-icon" style="background:${item.color}22">${item.icon || '📌'}</div>`;
 
-    // Nút video nếu có
-    const videoBtnHtml = item.videoUrl
-      ? `<span class="link-video-btn" onclick="event.preventDefault();event.stopPropagation();openVideoModal('Hướng dẫn: ${item.name}','${item.videoUrl}')">&#9654; Xem hướng dẫn</span>`
-      : '';
-
     a.innerHTML = `
       ${iconHtml}
       <div class="link-text">
         <div class="link-name">${item.name}</div>
         <div class="link-sub">${item.desc || ''}</div>
-        ${videoBtnHtml}
       </div>
       <div class="link-arrow">
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -469,56 +480,60 @@ function toggleMusic() {
   playing ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
 }
 
-// ── VIDEOS ──
-function renderVideos(videos) {
-  const section = document.getElementById('videoSection');
-  const grid    = document.getElementById('videoGrid');
-  if (!videos || videos.length === 0) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  grid.innerHTML = '';
-  videos.forEach(v => {
-    const vid = getYouTubeID(v.videoUrl);
-    const thumbSrc = v.thumb || (vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : '');
-    const card = document.createElement('a');
-    card.href = '#';
-    card.className = 'video-card';
-    card.onclick = (e) => { e.preventDefault(); openVideoModal(v.title, v.videoUrl); };
-    const catColor = v.categoryColor || '#7c3aed';
-    card.innerHTML = `
-      <div class="video-thumb-wrap">
-        ${thumbSrc ? `<img src="${thumbSrc}" alt="${v.title}" loading="lazy" onerror="this.style.display='none'">` : ''}
-        <div class="video-play-btn">
-          <div class="video-play-circle">
-            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-          </div>
-        </div>
-        ${v.category ? `<div class="video-cat-badge" style="background:${catColor}33;color:${catColor};border:1px solid ${catColor}55">${v.category}</div>` : ''}
-      </div>
-      <div class="video-info">
-        <div class="video-title">${v.title}</div>
-        ${v.desc ? `<div class="video-sub">${v.desc}</div>` : ''}
-      </div>`;
-    grid.appendChild(card);
-  });
-}
+// ── ITEM MODAL (video + link tải) ──
+function openItemModal(item) {
+  // Icon
+  const iconEl = document.getElementById('modalIcon');
+  if (item.thumb) {
+    iconEl.innerHTML = `<img src="${item.thumb}" alt="${item.name}" onerror="this.parentElement.innerHTML='${item.icon||'📌'}'">`;
+    iconEl.style.background = '';
+  } else {
+    iconEl.innerHTML = item.icon || '📌';
+    iconEl.style.background = (item.color || '#7c3aed') + '22';
+  }
 
-function openVideoModal(title, url) {
-  const vid = getYouTubeID(url);
-  if (!vid) { window.open(url, '_blank'); return; }
-  document.getElementById('modalTitle').textContent = title || 'Video hướng dẫn';
-  document.getElementById('modalIframe').src = `https://www.youtube.com/embed/${vid}?autoplay=1`;
-  document.getElementById('videoModal').classList.add('open');
+  document.getElementById('modalTitle').textContent = item.name;
+  document.getElementById('modalSub').textContent = item.desc || '';
+
+  // Video
+  const videoWrap = document.getElementById('modalVideoWrap');
+  const vid = getYouTubeID(item.videoUrl);
+  if (vid) {
+    videoWrap.innerHTML = `<div class="modal-video-wrap"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>`;
+  } else {
+    videoWrap.innerHTML = '<div class="modal-no-video">Chưa có video hướng dẫn</div>';
+  }
+
+  // Nút tải
+  const btn = document.getElementById('modalDownloadBtn');
+  if (item.url && item.url !== '#') {
+    btn.href = item.url;
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+  }
+
+  document.getElementById('itemModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function closeVideoModal(e) {
-  if (e && e.target !== document.getElementById('videoModal') && !e.target.closest('.modal-close')) return;
-  document.getElementById('modalIframe').src = '';
-  document.getElementById('videoModal').classList.remove('open');
+function closeItemModal(e) {
+  if (e && e.target !== document.getElementById('itemModal') && !e.target.closest('.modal-close')) return;
+  // Dừng video
+  const videoWrap = document.getElementById('modalVideoWrap');
+  videoWrap.innerHTML = '';
+  document.getElementById('itemModal').classList.remove('open');
   document.body.style.overflow = '';
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoModal({ target: document.getElementById('videoModal') }); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeItemModal({ target: document.getElementById('itemModal') });
+});
+
+// ── VIDEOS (legacy - không dùng nữa) ──
+function renderVideos() {}
+function openVideoModal() {}
+function closeVideoModal() {}
 
 // ── PARTICLES ──
 function spawnParticles() {
