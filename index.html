@@ -13,7 +13,30 @@
     --c1: #7c3aed; --c2: #06b6d4; --c3: #f0abfc;
     --bg: #07070f; --card-bg: rgba(255,255,255,0.04);
     --card-border: rgba(124,58,237,0.3); --text: #f1f5f9; --muted: #94a3b8;
+    --footer-color: rgba(255,255,255,0.2);
+    --intro-bg: #07070f;
   }
+  /* ═══════════ LIGHT THEME OVERRIDES ═══════════ */
+  body[data-theme="light"] {
+    --bg: #f3f1fb;
+    --card-bg: rgba(124,58,237,0.05);
+    --card-border: rgba(124,58,237,0.22);
+    --text: #1c1730;
+    --muted: #6b6584;
+    --footer-color: rgba(28,23,48,0.3);
+  }
+  body[data-theme="light"] .avatar-inner { border-color: var(--bg); }
+  body[data-theme="light"] .video-thumb-wrap { background: #e8e5f7; }
+  body[data-theme="light"] .modal-box { background: #fdfcff; border-color: rgba(124,58,237,0.3); }
+  body[data-theme="light"] .modal-header { border-bottom-color: rgba(28,23,48,0.08); }
+  body[data-theme="light"] .modal-close { background: rgba(28,23,48,0.06); color: var(--muted); }
+  body[data-theme="light"] .modal-close:hover { background: rgba(28,23,48,0.12); }
+  body[data-theme="light"] .modal-no-video { background: rgba(28,23,48,0.03); }
+  body[data-theme="light"] .link-arrow { background: rgba(28,23,48,0.05); }
+  body[data-theme="light"] .music-wave span { background: var(--c1); }
+  body[data-theme="light"] #particles { opacity: 0.5; }
+  body[data-theme="light"] .clock-digits .seg { text-shadow: 0 0 14px rgba(124,58,237,0.35); }
+  body, .link-card, .stat-card, .video-card, .music-bar, .cyber-clock, #site-bg-overlay { transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease; }
   body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
   /* INTRO */
@@ -201,7 +224,7 @@
   .modal-download-btn svg { width: 16px; height: 16px; fill: #fff; flex-shrink: 0; }
 
   /* FOOTER */
-  .footer { font-size: 0.75rem; color: rgba(255,255,255,0.2); text-align: center; margin-top: auto; padding-top: 2rem; letter-spacing: 2px; text-transform: uppercase; }
+  .footer { font-size: 0.75rem; color: var(--footer-color); text-align: center; margin-top: auto; padding-top: 2rem; letter-spacing: 2px; text-transform: uppercase; }
 
   /* ENTER SCREEN */
   #enter-screen { position: fixed; inset: 0; background: #07070f; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; opacity: 0; visibility: hidden; transition: opacity 0.6s ease, visibility 0.6s ease; }
@@ -222,6 +245,37 @@
   .admin-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: background 0.2s; text-decoration: none; }
   .admin-fab:hover { background: rgba(255,255,255,0.12); }
   .admin-fab svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
+  body[data-theme="light"] .admin-fab { background: rgba(28,23,48,0.06); border-color: rgba(28,23,48,0.1); }
+  body[data-theme="light"] .admin-fab:hover { background: rgba(28,23,48,0.12); }
+
+  /* THEME TOGGLE FAB */
+  .theme-fab {
+    position: fixed; bottom: 1.5rem; right: 5.5rem;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10; transition: background 0.2s, transform 0.15s;
+  }
+  .theme-fab:hover { background: rgba(255,255,255,0.12); }
+  .theme-fab:active { transform: scale(0.92); }
+  .theme-fab svg { width: 19px; height: 19px; stroke: var(--c2); fill: none; stroke-width: 1.6; transition: stroke 0.3s; }
+  .theme-fab svg .fill-mode { fill: var(--c2); stroke: none; }
+  body[data-theme="light"] .theme-fab { background: rgba(28,23,48,0.06); border-color: rgba(28,23,48,0.1); }
+  body[data-theme="light"] .theme-fab:hover { background: rgba(28,23,48,0.12); }
+  body[data-theme="light"] .theme-fab svg { stroke: var(--c1); }
+  body[data-theme="light"] .theme-fab svg .fill-mode { fill: var(--c1); }
+
+  .theme-toast {
+    position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: rgba(17,17,24,0.92); border: 1px solid rgba(124,58,237,0.4);
+    color: #f1f5f9; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.5px;
+    padding: 0.5rem 1.1rem; border-radius: 99px; z-index: 20;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease;
+    backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .theme-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  body[data-theme="light"] .theme-toast { background: rgba(255,255,255,0.95); color: #1c1730; border-color: rgba(124,58,237,0.3); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
@@ -345,6 +399,14 @@
   </div>
 </div>
 
+<!-- THEME TOGGLE FAB -->
+<button class="theme-fab" id="themeFab" onclick="cycleTheme()" title="Đổi giao diện">
+  <svg id="themeIconAuto" viewBox="0 0 24 24" style="display:none"><path d="M12 18a6 6 0 0 0 0-12v12Z" class="fill-mode"/><circle cx="12" cy="12" r="9"/></svg>
+  <svg id="themeIconLight" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  <svg id="themeIconDark" viewBox="0 0 24 24" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+</button>
+<div class="theme-toast" id="themeToast"></div>
+
 <!-- ADMIN FAB -->
 <a href="hieji-gaming-admin.html" class="admin-fab" title="Trang quản trị">
   <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
@@ -410,13 +472,16 @@ async function loadFromSupabase() {
 }
 
 // ── BACKGROUND ──
+let currentBgData = null;
 function applyBg(bg) {
+  currentBgData = bg || { url: '', opacity: 50 };
   const bgEl      = document.getElementById('site-bg');
   const overlayEl = document.getElementById('site-bg-overlay');
   if (bg && bg.url) {
     bgEl.style.backgroundImage = `url('${bg.url}')`;
     const opacity = (bg.opacity ?? 50) / 100;
-    overlayEl.style.background = `rgba(7,7,15,${opacity})`;
+    const overlayBase = document.body.getAttribute('data-theme') === 'light' ? '243,241,251' : '7,7,15';
+    overlayEl.style.background = `rgba(${overlayBase},${opacity})`;
   } else {
     bgEl.style.backgroundImage = 'none';
     overlayEl.style.background = 'transparent';
@@ -647,7 +712,73 @@ function spawnParticles() {
   }
 }
 
-// ── CYBER CLOCK: giờ Việt Nam (Asia/Ho_Chi_Minh, GMT+7) ──
+// ── THEME: Sáng / Tối / Tự động theo giờ Việt Nam ──
+const THEME_KEY = 'hieji_theme_pref';
+const THEME_ORDER = ['auto', 'light', 'dark'];
+const THEME_LABEL = { auto: '🕓 Tự động (theo giờ VN)', light: '☀️ Giao diện sáng', dark: '🌙 Giao diện tối' };
+
+function getVNHour() {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', hour12: false }).formatToParts(new Date());
+  const h = parts.find(p => p.type === 'hour')?.value;
+  return h === '24' ? 0 : parseInt(h, 10);
+}
+
+// Sáng từ 6:00 - 17:59, Tối từ 18:00 - 5:59 (giờ Việt Nam)
+function getAutoResolvedTheme() {
+  const h = getVNHour();
+  return (h >= 6 && h < 18) ? 'light' : 'dark';
+}
+
+function getThemePref() {
+  try { return localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) { return 'auto'; }
+}
+function setThemePref(mode) {
+  try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+}
+
+let lastResolvedTheme = null;
+function applyResolvedTheme(resolved) {
+  if (resolved === lastResolvedTheme) return;
+  lastResolvedTheme = resolved;
+  document.body.setAttribute('data-theme', resolved);
+  if (currentBgData) applyBg(currentBgData); // cập nhật lại overlay theo theme mới
+  updateThemeIcon();
+}
+
+function refreshTheme() {
+  const pref = getThemePref();
+  const resolved = pref === 'auto' ? getAutoResolvedTheme() : pref;
+  applyResolvedTheme(resolved);
+}
+
+function updateThemeIcon() {
+  const pref = getThemePref();
+  ['Auto', 'Light', 'Dark'].forEach(k => { const el = document.getElementById('themeIcon' + k); if (el) el.style.display = 'none'; });
+  const key = pref.charAt(0).toUpperCase() + pref.slice(1);
+  const el = document.getElementById('themeIcon' + key);
+  if (el) el.style.display = '';
+}
+
+function showThemeToast(text) {
+  const toast = document.getElementById('themeToast');
+  if (!toast) return;
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function cycleTheme() {
+  const cur = getThemePref();
+  const next = THEME_ORDER[(THEME_ORDER.indexOf(cur) + 1) % THEME_ORDER.length];
+  setThemePref(next);
+  const resolved = next === 'auto' ? getAutoResolvedTheme() : next;
+  lastResolvedTheme = null; // buộc áp dụng lại dù trùng giá trị
+  applyResolvedTheme(resolved);
+  showThemeToast(THEME_LABEL[next]);
+}
+
+
 function updateCyberClock() {
   const now = new Date();
   // Lấy các thành phần giờ theo timezone Việt Nam, không phụ thuộc múi giờ máy người dùng
@@ -682,6 +813,8 @@ function updateCyberClock() {
 
   const h24 = parseInt(hh, 10);
   periodEl.textContent = h24 < 12 ? 'SÁNG' : (h24 < 18 ? 'CHIỀU' : 'TỐI');
+
+  refreshTheme();
 }
 
 // ── INIT ──
@@ -689,6 +822,7 @@ let siteData = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
   spawnParticles();
+  refreshTheme();
   updateCyberClock();
   setInterval(updateCyberClock, 1000);
 
