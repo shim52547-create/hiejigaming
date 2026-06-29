@@ -82,21 +82,24 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 .search-input:focus { border-color: var(--c1); }
 .search-input::placeholder { color: var(--muted); }
 .search-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; pointer-events: none; }
-.search-results { background: rgba(7,7,15,0.95); border: 1px solid var(--border); border-radius: 12px; margin-top: 0.4rem; overflow: hidden; display: none; }
+.search-results { background: rgba(7,7,15,0.95); border: 1px solid var(--border); border-radius: 12px; margin-top: 0.4rem; overflow: hidden; display: none; max-height: 360px; overflow-y: auto; }
 .search-results.show { display: block; }
 .search-result-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 1rem; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .search-result-item:last-child { border-bottom: none; }
 .search-result-item:hover { background: rgba(124,58,237,0.12); }
-.sr-thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.sr-thumb { width: 44px; height: 32px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: rgba(255,255,255,0.05); }
 .sr-info { flex: 1; min-width: 0; }
 .sr-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sr-channel { font-size: 0.72rem; color: var(--muted); }
+.sr-loading-spin { width: 16px; height: 16px; border: 2px solid rgba(124,58,237,0.3); border-top-color: var(--c2); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* THEMES */
 .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-bottom: 1.5rem; }
-.theme-btn { border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s; background: var(--card); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.theme-btn { border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s; background: var(--card); display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
 .theme-btn:hover { border-color: var(--c1); background: rgba(124,58,237,0.1); transform: translateY(-2px); }
 .theme-btn.playing { border-color: var(--c2); background: rgba(6,182,212,0.1); }
+.theme-btn.loading { opacity: 0.6; pointer-events: none; }
 .theme-icon { font-size: 1.5rem; }
 .theme-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; color: var(--text); }
 .theme-desc { font-size: 0.62rem; color: var(--muted); }
@@ -105,9 +108,12 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 .quote-card { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.06)); border: 1px solid rgba(124,58,237,0.25); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.2s; }
 .quote-card:hover { border-color: rgba(124,58,237,0.5); }
 .quote-mark { font-size: 3rem; line-height: 1; color: rgba(124,58,237,0.25); font-family: Georgia, serif; position: absolute; top: 0.5rem; left: 0.9rem; }
-.quote-text { font-size: 1rem; font-weight: 500; line-height: 1.6; padding-left: 0.5rem; color: var(--text); }
-.quote-author { font-size: 0.78rem; color: var(--c2); margin-top: 0.75rem; font-weight: 600; padding-left: 0.5rem; }
-.quote-hint { font-size: 0.68rem; color: var(--muted); margin-top: 0.5rem; text-align: right; letter-spacing: 1px; }
+.quote-text { font-size: 1rem; font-weight: 500; line-height: 1.6; padding-left: 0.5rem; color: var(--text); min-height: 2.6em; transition: opacity 0.3s; }
+.quote-author { font-size: 0.78rem; color: var(--c2); margin-top: 0.75rem; font-weight: 600; padding-left: 0.5rem; transition: opacity 0.3s; }
+.quote-hint { font-size: 0.68rem; color: var(--muted); margin-top: 0.5rem; text-align: right; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+.quote-progress-bg { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 99px; margin-right: 10px; overflow: hidden; }
+.quote-progress-fill { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); width: 0%; }
+.quote-fade { opacity: 0; }
 
 /* TIMER */
 .timer-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; }
@@ -139,7 +145,7 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 .footer { text-align: center; font-size: 0.72rem; color: rgba(255,255,255,0.15); letter-spacing: 2px; text-transform: uppercase; margin-top: 2rem; }
 
 /* TOAST */
-.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(8px); background: rgba(17,17,24,0.95); border: 1px solid rgba(124,58,237,0.4); color: #f1f5f9; font-size: 0.8rem; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 99px; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; backdrop-filter: blur(8px); white-space: nowrap; }
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(8px); background: rgba(17,17,24,0.95); border: 1px solid rgba(124,58,237,0.4); color: #f1f5f9; font-size: 0.8rem; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 99px; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; backdrop-filter: blur(8px); white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* BREAK ALERT */
@@ -154,6 +160,9 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 
 /* HIDDEN YT */
 #yt-wrap { position: fixed; bottom: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* HIDDEN AUDIO (mp3 từ search) */
+audio#mp3Player { display: none; }
 </style>
 </head>
 <body>
@@ -227,11 +236,14 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 
   <!-- QUOTES -->
   <div class="section-label">💬 Lời động viên</div>
-  <div class="quote-card" id="quoteCard" onclick="nextQuote()">
+  <div class="quote-card" id="quoteCard" onclick="nextQuote(true)">
     <div class="quote-mark">"</div>
     <div class="quote-text" id="quoteText">Đang tải lời hay...</div>
     <div class="quote-author" id="quoteAuthor">—</div>
-    <div class="quote-hint">Bấm để xem lời mới ↻</div>
+    <div class="quote-hint">
+      <div class="quote-progress-bg"><div class="quote-progress-fill" id="quoteProgressFill"></div></div>
+      <span>Bấm để đổi ↻</span>
+    </div>
   </div>
 
   <!-- TIMER -->
@@ -277,6 +289,9 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 <!-- YT PLAYER -->
 <div id="yt-wrap"><div id="yt-player"></div></div>
 
+<!-- AUDIO PLAYER for mp3 search results -->
+<audio id="mp3Player"></audio>
+
 <!-- BREAK ALERT -->
 <div class="break-overlay" id="breakOverlay">
   <div class="break-box">
@@ -290,16 +305,33 @@ body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════ DATA ═══════════
+// ═══════════ CONFIG ═══════════
+// URL Cloudflare Worker của bạn — đã giấu API key an toàn ở phía server
+const WORKER_URL = "https://hieji-music-proxy.shim52547.workers.dev";
+
+// ═══════════ DATA: THEMES (mỗi theme nhiều video để random) ═══════════
 const THEMES = [
-  { id:'lofi',      icon:'🌙', name:'Lo-Fi',    desc:'Thư giãn',    color:'#7c3aed', query:'lofi hip hop study', vid:'jfKfPfyJRdk' },
-  { id:'jazz',      icon:'🎷', name:'Jazz',     desc:'Tập trung',   color:'#f59e0b', query:'smooth jazz', vid:'Dx5qFachd3A' },
-  { id:'nature',    icon:'🌿', name:'Thiên nhiên', desc:'Bình yên', color:'#22c55e', query:'nature sounds rain forest', vid:'eKFTSSKCzWA' },
-  { id:'gaming',    icon:'🎮', name:'Gaming',   desc:'Năng lượng',  color:'#ef4444', query:'epic gaming music', vid:'3mK5n0kPRrs' },
-  { id:'study',     icon:'📚', name:'Học bài',  desc:'Tập trung',   color:'#06b6d4', query:'study music concentration', vid:'5qap5aO4i9A' },
-  { id:'chill',     icon:'✨', name:'Chill',    desc:'Thoải mái',   color:'#f0abfc', query:'chill vibes playlist', vid:'36YnV9STBqc' },
+  { id:'lofi', icon:'🌙', name:'Lo-Fi', desc:'Thư giãn', vids:[
+      'jfKfPfyJRdk', '5qap5aO4i9A', '7NOSDKb0HlU', 'rJYpsZOijVo'
+    ] },
+  { id:'jazz', icon:'🎷', name:'Jazz', desc:'Tập trung', vids:[
+      'Dx5qFachd3A', 'fEvM-OUbaKs', 'neV3EPgvZ3g'
+    ] },
+  { id:'nature', icon:'🌿', name:'Thiên nhiên', desc:'Bình yên', vids:[
+      'eKFTSSKCzWA', 'qRTVg8HVeP8', '1ZYbU82GVz4'
+    ] },
+  { id:'gaming', icon:'🎮', name:'Gaming', desc:'Năng lượng', vids:[
+      '3mK5n0kPRrs', 'fGGRr83qhgo', 'M_AVAa1nUbQ'
+    ] },
+  { id:'study', icon:'📚', name:'Học bài', desc:'Tập trung', vids:[
+      '5qap5aO4i9A', 'WPni755-Krg', 'hHW1oY26kxQ', '4xDzrJKXOOY'
+    ] },
+  { id:'chill', icon:'✨', name:'Chill', desc:'Thoải mái', vids:[
+      '36YnV9STBqc', 'lTRiuFIWV54', 'kgx4WGK0oNU'
+    ] },
 ];
 
+// ═══════════ DATA: QUOTES (danh nhân thế giới + Việt Nam) ═══════════
 const QUOTES = [
   { text: 'Mỗi ngày tiến một bước nhỏ. Sau một năm, bạn đã đi được 365 bước.', author: 'Khuyết danh' },
   { text: 'Không cần hoàn hảo ngay từ đầu. Chỉ cần bắt đầu.', author: 'Khuyết danh' },
@@ -307,7 +339,7 @@ const QUOTES = [
   { text: 'Hôm nay khó, ngày mai dễ. Kiên trì là chìa khóa.', author: 'Khuyết danh' },
   { text: 'Não bộ cũng như cơ bắp — càng luyện càng mạnh.', author: 'Nghiên cứu khoa học' },
   { text: 'Bạn chưa thua. Bạn chỉ đang học cách để thắng.', author: 'Khuyết danh' },
-  { text: 'Tập trung 25 phút > loay hoay 3 tiếng với điện thoại.', author: 'Phương pháp Pomodoro' },
+  { text: 'Tập trung 25 phút hiệu quả hơn loay hoay 3 tiếng với điện thoại.', author: 'Phương pháp Pomodoro' },
   { text: 'Người thành công không phải làm nhiều hơn, họ làm đúng hơn.', author: 'Khuyết danh' },
   { text: 'Cứ tiếp tục. Mọi chuyên gia từng là người mới bắt đầu.', author: 'Helen Hayes' },
   { text: 'Đừng so sánh chương 1 của mình với chương 20 của người khác.', author: 'Khuyết danh' },
@@ -316,16 +348,37 @@ const QUOTES = [
   { text: 'Bộ não cần nước, giấc ngủ, và vận động — đừng bỏ qua điều đó.', author: 'Khoa học sức khoẻ' },
   { text: 'Mỗi lần ngồi xuống học là một lần đầu tư cho tương lai bạn.', author: 'Khuyết danh' },
   { text: 'Đừng chờ có hứng. Hứng đến sau khi bạn bắt đầu.', author: 'Tâm lý học hành vi' },
+  { text: 'Học không bao giờ là cùng, học mãi để tiến bộ mãi.', author: 'Hồ Chí Minh' },
+  { text: 'Vì lợi ích mười năm trồng cây, vì lợi ích trăm năm trồng người.', author: 'Hồ Chí Minh' },
+  { text: 'Không có việc gì khó, chỉ sợ lòng không bền. Đào núi và lấp biển, quyết chí ắt làm nên.', author: 'Hồ Chí Minh' },
+  { text: 'Đi một ngày đàng, học một sàng khôn.', author: 'Tục ngữ Việt Nam' },
+  { text: 'Hữu chí cánh thành — có ý chí thì việc gì cũng thành.', author: 'Nguyễn Trãi' },
+  { text: 'Học rộng rồi mới ra làm, học cho thật biết rồi mới hành.', author: 'Lê Quý Đôn' },
+  { text: 'Người có học mà không có hạnh, chẳng khác gì người không học.', author: 'Nguyễn Bỉnh Khiêm' },
+  { text: 'Tôi tư duy, vậy tôi tồn tại.', author: 'René Descartes' },
+  { text: 'Thiên tài chỉ có 1% là cảm hứng, 99% còn lại là mồ hôi và nước mắt.', author: 'Thomas Edison' },
+  { text: 'Trí tưởng tượng quan trọng hơn kiến thức.', author: 'Albert Einstein' },
+  { text: 'Tôi không thất bại. Tôi chỉ tìm ra 10.000 cách không hoạt động.', author: 'Thomas Edison' },
+  { text: 'Cách duy nhất để làm tốt công việc là yêu thích những gì bạn làm.', author: 'Steve Jobs' },
+  { text: 'Đừng sợ thất bại. Hãy sợ việc không cố gắng hết mình.', author: 'Michael Jordan' },
+  { text: 'Chúng ta là những gì chúng ta lặp lại nhiều lần. Sự xuất sắc không phải là hành động, mà là thói quen.', author: 'Aristotle' },
+  { text: 'Kiến thức là sức mạnh.', author: 'Francis Bacon' },
+  { text: 'Hãy sống như thể bạn sẽ chết ngày mai. Hãy học như thể bạn sẽ sống mãi.', author: 'Mahatma Gandhi' },
+  { text: 'Người chiến thắng không bao giờ bỏ cuộc, người bỏ cuộc không bao giờ chiến thắng.', author: 'Vince Lombardi' },
 ];
 
 // ═══════════ STATE ═══════════
 let ytPlayer = null, ytReady = false;
 let currentVidId = null, isPlaying = false;
+let currentMode = 'yt'; // 'yt' hoặc 'mp3'
 let shuffle = false, repeat = false;
 let currentTheme = null;
 let quoteIdx = Math.floor(Math.random() * QUOTES.length);
+let quoteAutoTimer = null, quoteProgressTimer = null;
+const QUOTE_INTERVAL = 15000; // 15 giây
 let timerInterval = null, timerTotal = 25*60, timerLeft = 25*60, timerRunning = false;
 let searchTimeout = null;
+const mp3Player = document.getElementById('mp3Player');
 
 // ═══════════ YOUTUBE API ═══════════
 const ytScript = document.createElement('script');
@@ -339,30 +392,45 @@ window.onYouTubeIframeAPIReady = function() {
     playerVars: { autoplay: 0, controls: 0 },
     events: {
       onStateChange: onPlayerState,
-      onReady: () => { setVolume(document.getElementById('volSlider').value); }
+      onReady: () => { setVolume(document.getElementById('volSlider').value); },
+      onError: onPlayerError
     }
   });
 };
+
+function onPlayerError(e) {
+  // Video lỗi / không nhúng được -> tự next sang bài khác trong theme
+  showToast('Video này không phát được, đang chuyển bài khác...');
+  if (currentTheme) {
+    setTimeout(() => playRandomFromTheme(currentTheme), 600);
+  }
+}
 
 function onPlayerState(e) {
   const S = YT.PlayerState;
   if (e.data === S.PLAYING) {
     isPlaying = true;
     document.getElementById('playBtn').classList.remove('paused');
-    document.getElementById('liveDot').style.background = '#22c55e';
-    document.getElementById('liveDot').style.boxShadow = '0 0 6px #22c55e';
+    setLiveDot(true);
     startProgressPoll();
   } else if (e.data === S.PAUSED || e.data === S.ENDED) {
     isPlaying = false;
     document.getElementById('playBtn').classList.add('paused');
-    document.getElementById('liveDot').style.background = 'var(--muted)';
-    document.getElementById('liveDot').style.boxShadow = 'none';
-    if (e.data === S.ENDED && repeat) ytPlayer.playVideo();
+    setLiveDot(false);
+    if (e.data === S.ENDED) {
+      if (repeat) ytPlayer.playVideo();
+      else if (currentTheme) playRandomFromTheme(currentTheme);
+    }
   }
 }
 
-function playVideo(videoId, title, artist, cat, thumbUrl) {
-  currentVidId = videoId;
+function setLiveDot(on) {
+  const dot = document.getElementById('liveDot');
+  dot.style.background = on ? '#22c55e' : 'var(--muted)';
+  dot.style.boxShadow = on ? '0 0 6px #22c55e' : 'none';
+}
+
+function setTrackUI(title, artist, cat, thumbUrl) {
   document.getElementById('trackName').textContent = title || 'Đang phát...';
   document.getElementById('trackArtist').textContent = artist || '—';
   document.getElementById('trackCat').textContent = cat || '🎵';
@@ -371,16 +439,73 @@ function playVideo(videoId, title, artist, cat, thumbUrl) {
   } else {
     document.getElementById('trackArt').innerHTML = '🎵';
   }
+}
+
+// Phát qua YouTube (dùng cho Theme)
+function playVideo(videoId, title, artist, cat, thumbUrl) {
+  // Dừng mp3 nếu đang phát
+  mp3Player.pause();
+  currentMode = 'yt';
+  currentVidId = videoId;
+  setTrackUI(title, artist, cat, thumbUrl);
   if (ytPlayer && ytReady) {
     ytPlayer.loadVideoById(videoId);
   }
 }
 
-// Progress polling
+// Phát mp3 trực tiếp (dùng cho kết quả Search)
+function playMp3(url, title, artist, cat, thumbUrl) {
+  if (ytPlayer && ytReady) ytPlayer.stopVideo();
+  currentMode = 'mp3';
+  setTrackUI(title, artist, cat, thumbUrl);
+  mp3Player.src = url;
+  mp3Player.volume = (document.getElementById('volSlider').value / 100);
+  mp3Player.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').classList.remove('paused');
+    setLiveDot(true);
+  }).catch(() => {
+    showToast('Không phát được file này, thử bài khác nhé!');
+  });
+}
+
+mp3Player.addEventListener('timeupdate', () => {
+  if (currentMode !== 'mp3') return;
+  const dur = mp3Player.duration || 0;
+  const cur = mp3Player.currentTime || 0;
+  const pct = dur > 0 ? (cur/dur)*100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('timeElapsed').textContent = fmtTime(cur);
+  document.getElementById('timeDur').textContent = fmtTime(dur);
+});
+mp3Player.addEventListener('ended', () => {
+  if (currentMode !== 'mp3') return;
+  isPlaying = false;
+  document.getElementById('playBtn').classList.add('paused');
+  setLiveDot(false);
+  if (repeat) { mp3Player.currentTime = 0; mp3Player.play(); }
+});
+mp3Player.addEventListener('pause', () => {
+  if (currentMode === 'mp3') {
+    isPlaying = false;
+    document.getElementById('playBtn').classList.add('paused');
+    setLiveDot(false);
+  }
+});
+mp3Player.addEventListener('play', () => {
+  if (currentMode === 'mp3') {
+    isPlaying = true;
+    document.getElementById('playBtn').classList.remove('paused');
+    setLiveDot(true);
+  }
+});
+
+// Progress polling (cho YouTube)
 let pollInterval = null;
 function startProgressPoll() {
   clearInterval(pollInterval);
   pollInterval = setInterval(() => {
+    if (currentMode !== 'yt') return;
     if (!ytPlayer || !ytPlayer.getDuration) return;
     const dur = ytPlayer.getDuration() || 0;
     const cur = ytPlayer.getCurrentTime() || 0;
@@ -391,11 +516,17 @@ function startProgressPoll() {
   }, 1000);
 }
 function fmtTime(s) {
+  if (!isFinite(s)) return '0:00';
   const m = Math.floor(s/60), sec = Math.floor(s%60);
   return m + ':' + String(sec).padStart(2,'0');
 }
 
 function togglePlay() {
+  if (currentMode === 'mp3') {
+    if (!mp3Player.src) { showToast('Hãy chọn nhạc hoặc chủ đề bên dưới!'); return; }
+    if (isPlaying) mp3Player.pause(); else mp3Player.play();
+    return;
+  }
   if (!ytPlayer || !ytReady) { showToast('Đang khởi tạo trình phát...'); return; }
   if (isPlaying) ytPlayer.pauseVideo();
   else { if (currentVidId) ytPlayer.playVideo(); else showToast('Hãy chọn nhạc hoặc chủ đề bên dưới!'); }
@@ -404,14 +535,22 @@ function togglePlay() {
 function setVolume(val) {
   document.getElementById('volVal').textContent = val + '%';
   if (ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(parseInt(val));
+  mp3Player.volume = val/100;
 }
 
-function prevTrack() { showToast('Đang phát lại từ đầu...'); if (ytPlayer && ytReady) ytPlayer.seekTo(0); }
-function nextTrack() { if (currentTheme) playTheme(currentTheme); else showToast('Chọn một chủ đề để random bài kế!'); }
+function prevTrack() {
+  if (currentMode === 'mp3') { mp3Player.currentTime = 0; return; }
+  showToast('Đang phát lại từ đầu...');
+  if (ytPlayer && ytReady) ytPlayer.seekTo(0);
+}
+function nextTrack() {
+  if (currentTheme) playRandomFromTheme(currentTheme);
+  else showToast('Chọn một chủ đề để chuyển bài kế!');
+}
 function toggleShuffle() { shuffle = !shuffle; document.getElementById('shuffleBtn').classList.toggle('active', shuffle); showToast(shuffle ? 'Bật shuffle' : 'Tắt shuffle'); }
 function toggleRepeat()  { repeat  = !repeat;  document.getElementById('repeatBtn').classList.toggle('active', repeat);   showToast(repeat  ? 'Bật lặp lại' : 'Tắt lặp lại'); }
 
-// ═══════════ THEMES ═══════════
+// ═══════════ THEMES (random nhiều bài / theme) ═══════════
 function renderThemes() {
   const grid = document.getElementById('themeGrid');
   grid.innerHTML = '';
@@ -420,93 +559,144 @@ function renderThemes() {
     btn.className = 'theme-btn';
     btn.id = 'theme-' + t.id;
     btn.innerHTML = `<div class="theme-icon">${t.icon}</div><div class="theme-name">${t.name}</div><div class="theme-desc">${t.desc}</div>`;
-    btn.onclick = () => playTheme(t);
+    btn.onclick = () => playRandomFromTheme(t);
     grid.appendChild(btn);
   });
 }
 
-function playTheme(theme) {
+function playRandomFromTheme(theme) {
   document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('playing'));
   const el = document.getElementById('theme-' + theme.id);
   if (el) el.classList.add('playing');
   currentTheme = theme;
-  playVideo(theme.vid, theme.name + ' Radio', 'YouTube Music', theme.icon + ' ' + theme.name, `https://img.youtube.com/vi/${theme.vid}/mqdefault.jpg`);
+
+  // Chọn random 1 video khác với video đang phát (nếu có nhiều hơn 1)
+  let pool = theme.vids;
+  if (pool.length > 1 && currentVidId) {
+    pool = pool.filter(v => v !== currentVidId);
+  }
+  const vid = pool[Math.floor(Math.random() * pool.length)];
+
+  playVideo(vid, theme.name + ' Radio', 'YouTube Music', theme.icon + ' ' + theme.name, `https://img.youtube.com/vi/${vid}/mqdefault.jpg`);
   showToast('Đang phát: ' + theme.name + ' ' + theme.icon);
 }
 
-// ═══════════ SEARCH ═══════════
+// ═══════════ SEARCH (thật, qua Cloudflare Worker) ═══════════
 function debounceSearch(val) {
   clearTimeout(searchTimeout);
-  if (!val || val.length < 2) { document.getElementById('searchResults').classList.remove('show'); return; }
-  searchTimeout = setTimeout(() => doSearch(val), 400);
+  if (!val || val.trim().length < 2) { document.getElementById('searchResults').classList.remove('show'); return; }
+  searchTimeout = setTimeout(() => doSearch(val.trim()), 450);
 }
 
 function handleSearchKey(e) {
-  if (e.key === 'Enter') doSearch(document.getElementById('searchInput').value);
+  if (e.key === 'Enter') doSearch(document.getElementById('searchInput').value.trim());
   if (e.key === 'Escape') document.getElementById('searchResults').classList.remove('show');
 }
 
-function doSearch(q) {
-  if (!q.trim()) return;
+async function doSearch(q) {
+  if (!q) return;
   const resultsEl = document.getElementById('searchResults');
-  resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Đang tìm kiếm...</div>';
+  resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:8px"><span class="sr-loading-spin"></span> Đang tìm kiếm...</div>';
   resultsEl.classList.add('show');
-  // Simulate search with YouTube oEmbed / known playlists based on keywords
-  const results = generateSearchResults(q.trim());
-  setTimeout(() => {
+
+  try {
+    const res = await fetch(`${WORKER_URL}/search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    if (data.error) {
+      resultsEl.innerHTML = `<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Lỗi tìm kiếm: ${escapeHtml(data.error)}</div>`;
+      return;
+    }
+
+    const results = data.results || [];
     if (results.length === 0) {
       resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Không tìm thấy. Thử từ khác!</div>';
       return;
     }
+
     resultsEl.innerHTML = '';
     results.forEach(r => {
       const item = document.createElement('div');
       item.className = 'search-result-item';
       item.innerHTML = `
-        <img class="sr-thumb" src="https://img.youtube.com/vi/${r.vid}/default.jpg" alt="" onerror="this.style.display='none'">
+        <img class="sr-thumb" src="${r.thumb}" alt="" onerror="this.style.visibility='hidden'">
         <div class="sr-info">
-          <div class="sr-title">${r.title}</div>
-          <div class="sr-channel">${r.channel}</div>
+          <div class="sr-title">${escapeHtml(r.title)}</div>
+          <div class="sr-channel">${escapeHtml(r.channel)}</div>
         </div>`;
-      item.onclick = () => {
-        playVideo(r.vid, r.title, r.channel, r.cat, `https://img.youtube.com/vi/${r.vid}/mqdefault.jpg`);
-        document.getElementById('searchInput').value = '';
-        resultsEl.classList.remove('show');
-        showToast('Đang tải: ' + r.title);
-      };
+      item.onclick = () => selectSearchResult(r);
       resultsEl.appendChild(item);
     });
-  }, 500);
+  } catch (err) {
+    resultsEl.innerHTML = '<div style="padding:.75rem 1rem;color:var(--muted);font-size:.85rem">Lỗi kết nối. Thử lại sau!</div>';
+  }
 }
 
-// Lightweight local search matching against curated list
-const SEARCH_DB = [
-  { vid:'jfKfPfyJRdk', title:'lofi hip hop radio – beats to relax/study', channel:'Lofi Girl', cat:'🌙 Lo-Fi', kw:['lofi','lo fi','hip hop','relax','study','học'] },
-  { vid:'5qap5aO4i9A', title:'lofi hip hop radio – beats to study/sleep', channel:'Lofi Girl', cat:'📚 Học bài', kw:['lofi','sleep','ngủ','study','học'] },
-  { vid:'Dx5qFachd3A', title:'smooth jazz – relaxing music', channel:'Jazz Radio', cat:'🎷 Jazz', kw:['jazz','smooth','relax','thư giãn'] },
-  { vid:'eKFTSSKCzWA', title:'rain forest sounds – nature ambience', channel:'Nature Sounds', cat:'🌿 Thiên nhiên', kw:['rain','mưa','nature','thiên nhiên','forest','rừng'] },
-  { vid:'3mK5n0kPRrs', title:'epic gaming music mix – power up', channel:'Gaming Music', cat:'🎮 Gaming', kw:['gaming','game','epic','power','năng lượng'] },
-  { vid:'36YnV9STBqc', title:'chill vibes playlist – relaxing beats', channel:'Chill Nation', cat:'✨ Chill', kw:['chill','vibes','relax','thoải mái'] },
-  { vid:'kgx4WGK0oNU', title:'white noise – focus & concentration', channel:'Focus Sounds', cat:'🎯 Focus', kw:['white noise','focus','concentration','tập trung'] },
-  { vid:'hHW1oY26kxQ', title:'piano music for studying – classical', channel:'Piano Classics', cat:'🎹 Piano', kw:['piano','classical','cổ điển','học'] },
-  { vid:'WPni755-Krg', title:'classical music for brain power', channel:'Classical Radio', cat:'🎻 Classical', kw:['classical','cổ điển','brain','nhạc cổ'] },
-  { vid:'77ZozI0rw7w', title:'coding music – deep focus electronic', channel:'Focus Music', cat:'💻 Coding', kw:['code','coding','electronic','deep focus','lập trình'] },
-];
+async function selectSearchResult(r) {
+  const resultsEl = document.getElementById('searchResults');
+  resultsEl.classList.remove('show');
+  document.getElementById('searchInput').value = '';
+  showToast('Đang tải: ' + r.title);
+  setTrackUI('Đang tải bài hát...', r.channel, '⏳', r.thumb);
 
-function generateSearchResults(q) {
-  const words = q.toLowerCase().split(/\s+/);
-  return SEARCH_DB.filter(r => words.some(w => r.kw.some(k => k.includes(w)) || r.title.toLowerCase().includes(w) || r.channel.toLowerCase().includes(w))).slice(0, 5);
+  try {
+    const res = await fetch(`${WORKER_URL}/?id=${encodeURIComponent(r.vid)}`);
+    const data = await res.json();
+
+    if (data.status === 'ok' && data.link) {
+      playMp3(data.link, r.title, r.channel, '🎵 Tìm kiếm', `https://img.youtube.com/vi/${r.vid}/mqdefault.jpg`);
+    } else {
+      showToast('Không lấy được file nhạc, thử bài khác!');
+    }
+  } catch (err) {
+    showToast('Lỗi tải nhạc, thử lại sau!');
+  }
 }
 
-// ═══════════ QUOTES ═══════════
-function renderQuote() {
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+// ═══════════ QUOTES (auto-rotate 15s + thanh tiến trình) ═══════════
+function renderQuote(fade) {
   const q = QUOTES[quoteIdx];
-  document.getElementById('quoteText').textContent = q.text;
-  document.getElementById('quoteAuthor').textContent = '— ' + q.author;
+  const textEl = document.getElementById('quoteText');
+  const authorEl = document.getElementById('quoteAuthor');
+
+  if (fade) {
+    textEl.classList.add('quote-fade');
+    authorEl.classList.add('quote-fade');
+    setTimeout(() => {
+      textEl.textContent = q.text;
+      authorEl.textContent = '— ' + q.author;
+      textEl.classList.remove('quote-fade');
+      authorEl.classList.remove('quote-fade');
+    }, 250);
+  } else {
+    textEl.textContent = q.text;
+    authorEl.textContent = '— ' + q.author;
+  }
 }
-function nextQuote() {
+
+function nextQuote(manual) {
   quoteIdx = (quoteIdx + 1) % QUOTES.length;
-  renderQuote();
+  renderQuote(true);
+  restartQuoteAutoTimer();
+}
+
+function restartQuoteAutoTimer() {
+  clearTimeout(quoteAutoTimer);
+  clearInterval(quoteProgressTimer);
+  const fill = document.getElementById('quoteProgressFill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${QUOTE_INTERVAL}ms linear`;
+    fill.style.width = '100%';
+  });
+  quoteAutoTimer = setTimeout(() => { nextQuote(false); }, QUOTE_INTERVAL);
 }
 
 // ═══════════ TIMER ═══════════
@@ -658,7 +848,8 @@ document.getElementById('customSec').addEventListener('input', function() {
 // ═══════════ INIT ═══════════
 spawnParticles();
 renderThemes();
-renderQuote();
+renderQuote(false);
+restartQuoteAutoTimer();
 updateTimerDisplay();
 document.getElementById('timerCircle').style.strokeDasharray = (2 * Math.PI * 54).toFixed(1);
 </script>
