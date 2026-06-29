@@ -6,6 +6,7 @@
 <title>HieJi Gaming — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -17,26 +18,13 @@
   body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   /* ── LOGIN ── */
-  #loginScreen {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 1.5rem; padding: 2rem;
-  }
-  .login-logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 1.2rem; font-weight: 900;
-    background: linear-gradient(90deg, var(--c1), var(--c2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    letter-spacing: 3px;
-  }
-  .login-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px;
-  }
+  #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; padding: 2rem; }
+  .login-logo { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; }
+  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; }
   .login-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
   .form-group { margin-bottom: 1rem; }
   label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 1px; text-transform: uppercase; }
-  input[type=text], input[type=password], input[type=url], input[type=number], select {
+  input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], select {
     width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
     border-radius: 8px; padding: 0.6rem 0.9rem; color: var(--text); font-family: 'Rajdhani', sans-serif;
     font-size: 0.95rem; outline: none; transition: border-color 0.2s;
@@ -48,8 +36,9 @@
     font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s;
   }
   .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-primary { background: linear-gradient(135deg, var(--c1), #9333ea); color: #fff; width: 100%; }
-  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.9; }
   .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); }
   .btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
   .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
@@ -57,28 +46,18 @@
 
   /* ── ADMIN SHELL ── */
   #adminShell { display: none; min-height: 100vh; flex-direction: column; }
-  .topbar {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem;
-    position: sticky; top: 0; z-index: 50;
-  }
-  .topbar-logo { font-family: 'Orbitron', monospace; font-size: 0.9rem; font-weight: 900;
-    background: linear-gradient(90deg, var(--c1), var(--c2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px;
-  }
-  .topbar-badge { font-size: 0.7rem; background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3);
-    border-radius: 99px; padding: 2px 8px; font-weight: 600; letter-spacing: 1px;
-  }
-  .topbar-actions { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
+  .topbar-logo { font-family: 'Orbitron', monospace; font-size: 0.9rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
+  .topbar-badge { font-size: 0.7rem; background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); border-radius: 99px; padding: 2px 8px; font-weight: 600; letter-spacing: 1px; }
+  .topbar-user { font-size: 0.8rem; color: var(--muted); }
+  .topbar-actions { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
   .save-status { font-size: 0.8rem; color: var(--muted); }
   .save-status.saved { color: #22c55e; }
+  .save-status.error { color: var(--danger); }
 
   /* ── TABS ── */
   .tabs { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; overflow-x: auto; }
-  .tab { padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: var(--muted);
-    cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap; user-select: none;
-  }
+  .tab { padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; user-select: none; }
   .tab.active { color: var(--c1); border-color: var(--c1); }
 
   /* ── CONTENT ── */
@@ -94,11 +73,7 @@
 
   /* ── ITEM LIST ── */
   .item-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
-  .item-row {
-    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-    border-radius: 10px; padding: 0.75rem 1rem;
-    display: flex; align-items: center; gap: 0.75rem;
-  }
+  .item-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; }
   .item-icon { font-size: 1.4rem; flex-shrink: 0; }
   .item-info { flex: 1; min-width: 0; }
   .item-name { font-weight: 600; font-size: 0.95rem; }
@@ -106,20 +81,12 @@
   .item-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
 
   /* ── ADD FORM ── */
-  .add-form {
-    background: rgba(124,58,237,0.06); border: 1px dashed rgba(124,58,237,0.3);
-    border-radius: 10px; padding: 1rem;
-  }
+  .add-form { background: rgba(124,58,237,0.06); border: 1px dashed rgba(124,58,237,0.3); border-radius: 10px; padding: 1rem; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .form-row.single { grid-template-columns: 1fr; }
   @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
 
   /* ── MUSIC ── */
-  .music-status {
-    display: flex; align-items: center; gap: 0.75rem;
-    background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2);
-    border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem;
-  }
+  .music-status { display: flex; align-items: center; gap: 0.75rem; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
   .music-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
   .music-dot.off { background: var(--muted); }
 
@@ -128,29 +95,38 @@
   @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
   .stat-edit { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
   .stat-edit input { margin-bottom: 0.5rem; }
+
+  /* ── LOADING OVERLAY ── */
+  #loadingOverlay { position: fixed; inset: 0; background: rgba(9,9,15,0.8); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+  #loadingOverlay.hidden { display: none; }
+  .spinner { width: 40px; height: 40px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--c1); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loadingOverlay"><div class="spinner"></div></div>
+
 <!-- LOGIN -->
-<div id="loginScreen">
+<div id="loginScreen" style="display:none">
   <div class="login-logo">HIEJI GAMING</div>
   <div class="login-card">
     <h2>🔐 Đăng nhập Admin</h2>
     <div class="form-group">
-      <label>Tên đăng nhập</label>
-      <input type="text" id="uname" placeholder="admin" />
+      <label>Email</label>
+      <input type="email" id="uEmail" placeholder="admin@email.com" />
     </div>
     <div class="form-group">
       <label>Mật khẩu</label>
-      <input type="password" id="passwd" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      <input type="password" id="uPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" />
     </div>
-    <div class="err-msg" id="loginErr">Sai tên đăng nhập hoặc mật khẩu</div>
+    <div class="err-msg" id="loginErr"></div>
     <div style="margin-top:1.25rem">
-      <button class="btn btn-primary" onclick="doLogin()">Đăng nhập</button>
+      <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Đăng nhập</button>
     </div>
     <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--muted);text-align:center">
-      Mặc định: admin / hieji2025
+      Dùng tài khoản đã tạo trong Supabase Auth
     </div>
   </div>
 </div>
@@ -160,10 +136,11 @@
   <div class="topbar">
     <span class="topbar-logo">HJ ADMIN</span>
     <span class="topbar-badge">PANEL</span>
+    <span class="topbar-user" id="topbarUser"></span>
     <div class="topbar-actions">
-      <span class="save-status" id="saveStatus">Chưa lưu</span>
-      <button class="btn btn-primary btn-sm" onclick="saveAll()">💾 Lưu tất cả</button>
-      <button class="btn btn-secondary btn-sm" onclick="goBack()">← Xem trang bio</button>
+      <span class="save-status" id="saveStatus">Chưa có thay đổi</span>
+      <button class="btn btn-primary btn-sm" id="saveBtn" onclick="saveAll()">💾 Lưu tất cả</button>
+      <button class="btn btn-secondary btn-sm" onclick="window.open('https://hiejigaming.netlify.app/','_blank')">← Xem trang bio</button>
       <button class="btn btn-secondary btn-sm" onclick="doLogout()">Đăng xuất</button>
     </div>
   </div>
@@ -179,7 +156,7 @@
 
   <div class="content">
 
-    <!-- ── MUSIC PANEL ── -->
+    <!-- MUSIC -->
     <div id="panel-music" class="panel active">
       <div class="panel-title">🎵 Nhạc nền</div>
       <div class="card">
@@ -190,35 +167,19 @@
             <div style="font-size:.75rem;color:var(--muted)">Thêm link nhạc bên dưới</div>
           </div>
         </div>
-
-        <div class="form-group">
-          <label>Link nhạc (YouTube, SoundCloud, MP3 trực tiếp...)</label>
-          <input type="url" id="musicUrl" placeholder="https://..." />
-        </div>
+        <div class="form-group"><label>Link nhạc (YouTube)</label><input type="url" id="musicUrl" placeholder="https://www.youtube.com/watch?v=..." /></div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Tên bài hát</label>
-            <input type="text" id="musicTitle" placeholder="Tên bài hát" />
-          </div>
-          <div class="form-group">
-            <label>Nguồn / Nghệ sĩ</label>
-            <input type="text" id="musicSource" placeholder="Nghệ sĩ / Album" />
-          </div>
+          <div class="form-group"><label>Tên bài hát</label><input type="text" id="musicTitle2" placeholder="Tên bài hát" /></div>
+          <div class="form-group"><label>Nghệ sĩ / Album</label><input type="text" id="musicSource" placeholder="Nghệ sĩ" /></div>
         </div>
         <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="applyMusic()">✅ Áp dụng nhạc</button>
+          <button class="btn btn-primary" style="width:auto" onclick="applyMusic()">✅ Áp dụng</button>
           <button class="btn btn-danger" onclick="removeMusic()">🗑 Xóa nhạc</button>
-        </div>
-        <div style="margin-top:1rem;padding:0.75rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:.8rem;color:var(--muted);line-height:1.7">
-          <strong style="color:var(--text)">💡 Gợi ý:</strong><br>
-          • MP3 trực tiếp: link kết thúc bằng <code>.mp3</code><br>
-          • SoundCloud: dùng link embed<br>
-          • Hoặc upload file MP3 lên server và dán link vào đây
         </div>
       </div>
     </div>
 
-    <!-- ── GAMES PANEL ── -->
+    <!-- GAMES -->
     <div id="panel-games" class="panel">
       <div class="panel-title">🎮 Quản lý Game</div>
       <div class="card">
@@ -235,12 +196,12 @@
             <div class="form-group"><label>Màu (hex)</label><input type="text" id="gColor" placeholder="#7c3aed" /></div>
           </div>
           <div class="form-group"><label>Link</label><input type="url" id="gUrl" placeholder="https://..." /></div>
-          <button class="btn btn-primary" onclick="addItem('games')">➕ Thêm game</button>
+          <button class="btn btn-primary" style="width:auto" onclick="addItem('games')">➕ Thêm game</button>
         </div>
       </div>
     </div>
 
-    <!-- ── APPS PANEL ── -->
+    <!-- APPS -->
     <div id="panel-apps" class="panel">
       <div class="panel-title">📱 Quản lý Ứng dụng</div>
       <div class="card">
@@ -257,12 +218,12 @@
             <div class="form-group"><label>Màu (hex)</label><input type="text" id="aColor" placeholder="#06b6d4" /></div>
           </div>
           <div class="form-group"><label>Link</label><input type="url" id="aUrl" placeholder="https://..." /></div>
-          <button class="btn btn-primary" onclick="addItem('apps')">➕ Thêm ứng dụng</button>
+          <button class="btn btn-primary" style="width:auto" onclick="addItem('apps')">➕ Thêm ứng dụng</button>
         </div>
       </div>
     </div>
 
-    <!-- ── SOCIAL PANEL ── -->
+    <!-- SOCIAL -->
     <div id="panel-social" class="panel">
       <div class="panel-title">🔗 Mạng xã hội</div>
       <div class="card">
@@ -279,12 +240,12 @@
             <div class="form-group"><label>Màu (hex)</label><input type="text" id="sColor" placeholder="#ef4444" /></div>
           </div>
           <div class="form-group"><label>Link</label><input type="url" id="sUrl" placeholder="https://..." /></div>
-          <button class="btn btn-primary" onclick="addItem('social')">➕ Thêm</button>
+          <button class="btn btn-primary" style="width:auto" onclick="addItem('social')">➕ Thêm</button>
         </div>
       </div>
     </div>
 
-    <!-- ── STATS PANEL ── -->
+    <!-- STATS -->
     <div id="panel-stats" class="panel">
       <div class="panel-title">📊 Thống kê</div>
       <div class="card">
@@ -293,15 +254,15 @@
       </div>
     </div>
 
-    <!-- ── SETTINGS PANEL ── -->
+    <!-- SETTINGS -->
     <div id="panel-settings" class="panel">
       <div class="panel-title">⚙️ Cài đặt</div>
       <div class="card">
         <h3 style="margin-bottom:1rem;font-size:1rem">🔑 Đổi mật khẩu</h3>
-        <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="newPwd" placeholder="Mật khẩu mới" /></div>
-        <div class="form-group"><label>Xác nhận mật khẩu</label><input type="password" id="confPwd" placeholder="Nhập lại" /></div>
-        <div class="err-msg" id="pwdErr" style="display:none">Mật khẩu không khớp</div>
-        <button class="btn btn-primary" onclick="changePassword()">Đổi mật khẩu</button>
+        <div class="form-group"><label>Mật khẩu mới</label><input type="password" id="newPwd" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" /></div>
+        <div class="err-msg" id="pwdMsg"></div>
+        <button class="btn btn-primary" style="width:auto" onclick="changePassword()">Đổi mật khẩu</button>
+        <p style="margin-top:.75rem;font-size:.8rem;color:var(--muted)">Mật khẩu được quản lý bởi Supabase Auth — thay đổi sẽ có hiệu lực ngay.</p>
       </div>
       <div class="card" style="margin-top:1rem">
         <h3 style="margin-bottom:1rem;font-size:1rem;color:var(--danger)">⚠️ Vùng nguy hiểm</h3>
@@ -313,39 +274,15 @@
 </div>
 
 <script>
-// ── AUTH ──
-const DEFAULT_PASS = 'hieji2025';
-const ADMIN_USER = 'admin';
+// ══════════════════════════════════════════════
+// ⚙️  CẤU HÌNH SUPABASE — điền vào đây
+// ══════════════════════════════════════════════
+const SUPABASE_URL     = 'https://iivwsnbhkffxvmccktuj.supabase.co';
+const SUPABASE_ANON_KEY = 'PASTE_YOUR_ANON_PUBLIC_KEY_HERE'; // anon/public key
+// ══════════════════════════════════════════════
 
-function doLogin() {
-  const u = document.getElementById('uname').value.trim();
-  const p = document.getElementById('passwd').value;
-  const storedPwd = localStorage.getItem('hieji_admin_pwd') || DEFAULT_PASS;
-  if (u === ADMIN_USER && p === storedPwd) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminShell').style.display = 'flex';
-    renderAdmin();
-    localStorage.setItem('hieji_session', '1');
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
-  }
-}
-function doLogout() {
-  localStorage.removeItem('hieji_session');
-  location.reload();
-}
-function goBack() { window.open('https://hiejigaming.netlify.app/', '_blank'); }
-function changePassword() {
-  const np = document.getElementById('newPwd').value;
-  const cp = document.getElementById('confPwd').value;
-  const e = document.getElementById('pwdErr');
-  if (np !== cp || np.length < 4) { e.style.display = 'block'; return; }
-  e.style.display = 'none';
-  localStorage.setItem('hieji_admin_pwd', np);
-  alert('✅ Đổi mật khẩu thành công!');
-}
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ── DATA ──
 const DEFAULT_DATA = {
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
@@ -367,28 +304,103 @@ const DEFAULT_DATA = {
   ]
 };
 
-function loadData() {
-  try {
-    const s = localStorage.getItem('hieji_data');
-    return s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_DATA));
-  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
-}
-let D = loadData();
+let D = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentUser = null;
 
-function saveAll() {
-  localStorage.setItem('hieji_data', JSON.stringify(D));
-  const st = document.getElementById('saveStatus');
-  st.textContent = '✅ Đã lưu!'; st.className = 'save-status saved';
-  setTimeout(() => { st.textContent = 'Đã lưu'; }, 2000);
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('uEmail').value.trim();
+  const pass  = document.getElementById('uPass').value;
+  const errEl = document.getElementById('loginErr');
+  const btn   = document.getElementById('loginBtn');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Đang đăng nhập...';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.disabled = false;
+  btn.textContent = 'Đăng nhập';
+
+  if (error) {
+    errEl.textContent = 'Email hoặc mật khẩu không đúng';
+    errEl.style.display = 'block';
+    return;
+  }
+  currentUser = data.user;
+  showAdmin();
 }
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function changePassword() {
+  const np = document.getElementById('newPwd').value;
+  const msg = document.getElementById('pwdMsg');
+  if (np.length < 6) {
+    msg.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+    msg.style.display = 'block'; return;
+  }
+  const { error } = await sb.auth.updateUser({ password: np });
+  if (error) { msg.textContent = 'Lỗi: ' + error.message; msg.style.display = 'block'; return; }
+  msg.style.color = '#22c55e';
+  msg.textContent = '✅ Đổi mật khẩu thành công!';
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; msg.style.color = ''; }, 3000);
+}
+
+// ── DATA ──
+async function loadData() {
+  const { data, error } = await sb.from('hieji_config').select('key, value');
+  if (error || !data) return;
+  const result = {};
+  data.forEach(row => { result[row.key] = row.value; });
+  D = {
+    music:  result.music  ?? DEFAULT_DATA.music,
+    stats:  result.stats  ?? DEFAULT_DATA.stats,
+    games:  result.games  ?? DEFAULT_DATA.games,
+    apps:   result.apps   ?? DEFAULT_DATA.apps,
+    social: result.social ?? DEFAULT_DATA.social,
+  };
+}
+
+async function saveAll() {
+  const btn = document.getElementById('saveBtn');
+  const st  = document.getElementById('saveStatus');
+  btn.disabled = true;
+  st.textContent = 'Đang lưu...'; st.className = 'save-status';
+
+  // Upsert từng key một vào bảng hieji_config
+  const rows = [
+    { key: 'music',  value: D.music  },
+    { key: 'stats',  value: D.stats  },
+    { key: 'games',  value: D.games  },
+    { key: 'apps',   value: D.apps   },
+    { key: 'social', value: D.social },
+  ];
+
+  const { error } = await sb.from('hieji_config').upsert(rows, { onConflict: 'key' });
+
+  btn.disabled = false;
+  if (error) {
+    st.textContent = '❌ Lỗi lưu: ' + error.message; st.className = 'save-status error';
+  } else {
+    st.textContent = '✅ Đã lưu!'; st.className = 'save-status saved';
+    setTimeout(() => { st.textContent = 'Chưa có thay đổi'; st.className = 'save-status'; }, 2500);
+  }
+}
+
 function markChanged() {
   const st = document.getElementById('saveStatus');
-  st.textContent = '● Chưa lưu'; st.className = 'save-status';
+  st.textContent = '● Có thay đổi chưa lưu'; st.className = 'save-status';
 }
-function resetData() {
-  if (!confirm('Khôi phục tất cả dữ liệu mặc định?')) return;
+
+async function resetData() {
+  if (!confirm('Khôi phục tất cả dữ liệu mặc định? Hành động này không thể hoàn tác.')) return;
   D = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  saveAll(); renderAdmin();
+  await saveAll();
+  renderAdmin();
 }
 
 // ── TABS ──
@@ -399,8 +411,8 @@ function switchTab(name, el) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// ── RENDER ITEM LIST ──
-function renderItemList(listId, category, namePrefix) {
+// ── RENDER LISTS ──
+function renderItemList(listId, category) {
   const el = document.getElementById(listId);
   el.innerHTML = '';
   const items = D[category] || [];
@@ -427,68 +439,53 @@ function renderItemList(listId, category, namePrefix) {
 }
 
 function addItem(category) {
-  const prefixMap = { games: 'g', apps: 'a', social: 's' };
-  const p = prefixMap[category];
+  const p = { games: 'g', apps: 'a', social: 's' }[category];
   const name = document.getElementById(p+'Name').value.trim();
   if (!name) { alert('Vui lòng nhập tên!'); return; }
-  const item = {
+  D[category].push({
     name, icon: document.getElementById(p+'Icon').value || '📌',
     desc: document.getElementById(p+'Desc').value,
-    url: document.getElementById(p+'Url').value,
+    url:  document.getElementById(p+'Url').value,
     color: document.getElementById(p+'Color').value || '#7c3aed'
-  };
-  D[category].push(item);
-  // clear fields
-  [p+'Name', p+'Icon', p+'Desc', p+'Url', p+'Color'].forEach(id => { document.getElementById(id).value = ''; });
-  renderListForCategory(category); markChanged();
+  });
+  [p+'Name', p+'Icon', p+'Desc', p+'Url', p+'Color'].forEach(id => document.getElementById(id).value = '');
+  renderListForCat(category); markChanged();
 }
 
 function removeItem(category, idx) {
   if (!confirm('Xóa mục này?')) return;
   D[category].splice(idx, 1);
-  renderListForCategory(category); markChanged();
+  renderListForCat(category); markChanged();
 }
 
 function moveItem(category, idx, dir) {
-  const arr = D[category];
-  const ni = idx + dir;
+  const arr = D[category]; const ni = idx + dir;
   if (ni < 0 || ni >= arr.length) return;
   [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
-  renderListForCategory(category); markChanged();
+  renderListForCat(category); markChanged();
 }
 
-function renderListForCategory(cat) {
-  const map = { games: 'gamesList', apps: 'appsList', social: 'socialList' };
-  renderItemList(map[cat], cat);
+function renderListForCat(cat) {
+  renderItemList({ games: 'gamesList', apps: 'appsList', social: 'socialList' }[cat], cat);
 }
 
 // ── MUSIC ──
 function applyMusic() {
-  const url = document.getElementById('musicUrl').value.trim();
-  const title = document.getElementById('musicTitle').value.trim() || 'Nhạc nền';
+  const url    = document.getElementById('musicUrl').value.trim();
+  const title  = document.getElementById('musicTitle2').value.trim() || 'Nhạc nền';
   const source = document.getElementById('musicSource').value.trim();
   D.music = { url, title, source };
-  updateMusicStatus();
-  markChanged();
+  updateMusicStatus(); markChanged();
 }
 function removeMusic() {
   D.music = { url: '', title: 'Chưa có nhạc', source: '' };
-  document.getElementById('musicUrl').value = '';
-  document.getElementById('musicTitle').value = '';
-  document.getElementById('musicSource').value = '';
+  ['musicUrl','musicTitle2','musicSource'].forEach(id => document.getElementById(id).value = '');
   updateMusicStatus(); markChanged();
 }
 function updateMusicStatus() {
   const m = D.music;
-  const dot = document.getElementById('musicDot');
-  const title = document.getElementById('musicStatusTitle');
-  if (m.url) {
-    dot.className = 'music-dot';
-    title.textContent = m.title || 'Nhạc đã thiết lập';
-  } else {
-    dot.className = 'music-dot off';
-    title.textContent = 'Chưa có nhạc';
-  }
+  document.getElementById('musicDot').className = 'music-dot' + (m.url ? '' : ' off');
+  document.getElementById('musicStatusTitle').textContent = m.url ? (m.title || 'Nhạc đã thiết lập') : 'Chưa có nhạc';
 }
 
 // ── STATS ──
@@ -499,31 +496,47 @@ function renderStatsEdit() {
     const d = document.createElement('div');
     d.className = 'stat-edit';
     d.innerHTML = `
-      <div class="form-group"><label>Số liệu</label><input type="text" value="${s.value}" onchange="updateStat(${i},'value',this.value)" /></div>
-      <div class="form-group"><label>Nhãn</label><input type="text" value="${s.label}" onchange="updateStat(${i},'label',this.value)" /></div>`;
+      <div class="form-group"><label>Số liệu</label><input type="text" value="${s.value}" oninput="updateStat(${i},'value',this.value)" /></div>
+      <div class="form-group"><label>Nhãn</label><input type="text" value="${s.label}" oninput="updateStat(${i},'label',this.value)" /></div>`;
     grid.appendChild(d);
   });
 }
 function updateStat(i, key, val) { D.stats[i][key] = val; markChanged(); }
 
-// ── INIT ──
+// ── SHOW ADMIN ──
+async function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminShell').style.display  = 'flex';
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+
+  await loadData();
+  document.getElementById('loadingOverlay').classList.add('hidden');
+
+  if (currentUser) document.getElementById('topbarUser').textContent = '👤 ' + currentUser.email;
+  renderAdmin();
+}
+
 function renderAdmin() {
-  renderItemList('gamesList', 'games');
-  renderItemList('appsList', 'apps');
+  renderItemList('gamesList',  'games');
+  renderItemList('appsList',   'apps');
   renderItemList('socialList', 'social');
   renderStatsEdit();
-  // fill music fields
-  document.getElementById('musicUrl').value = D.music.url || '';
-  document.getElementById('musicTitle').value = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
-  document.getElementById('musicSource').value = D.music.source || '';
+  document.getElementById('musicUrl').value     = D.music.url    || '';
+  document.getElementById('musicTitle2').value  = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
+  document.getElementById('musicSource').value  = D.music.source || '';
   updateMusicStatus();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('hieji_session') === '1') {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminShell').style.display = 'flex';
-    renderAdmin();
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  document.getElementById('loadingOverlay').classList.add('hidden');
+
+  if (session) {
+    currentUser = session.user;
+    showAdmin();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
   }
 });
 </script>
