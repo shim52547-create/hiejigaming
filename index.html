@@ -90,6 +90,8 @@
   .link-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
   .link-arrow { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .link-arrow svg { width: 12px; height: 12px; stroke: var(--muted); fill: none; stroke-width: 2; }
+  .link-video-btn { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; padding: 3px 10px; border-radius: 99px; background: rgba(124,58,237,0.18); border: 1px solid rgba(124,58,237,0.4); color: #a78bfa; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: background 0.2s; }
+  .link-video-btn:hover { background: rgba(124,58,237,0.35); }
 
   /* STATS */
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; width: 100%; max-width: 400px; margin-bottom: 2.5rem; }
@@ -351,21 +353,29 @@ function renderLinks(containerId, items) {
     return;
   }
   items.forEach(item => {
+    const outer = document.createElement('div');
+    outer.style.cssText = 'display:flex;flex-direction:column;gap:0';
+
     const a = document.createElement('a');
     a.href = item.url || '#';
     if (item.url && item.url !== '#') a.target = '_blank';
     a.className = 'link-card';
 
-    // Icon: thumbnail image OR emoji with color background
     const iconHtml = item.thumb
       ? `<div class="link-icon"><img src="${item.thumb}" alt="${item.name}" onerror="this.parentElement.innerHTML='${item.icon||'📌'}'"></div>`
       : `<div class="link-icon" style="background:${item.color}22">${item.icon || '📌'}</div>`;
+
+    // Nút video nếu có
+    const videoBtnHtml = item.videoUrl
+      ? `<span class="link-video-btn" onclick="event.preventDefault();event.stopPropagation();openVideoModal('Hướng dẫn: ${item.name}','${item.videoUrl}')">&#9654; Xem hướng dẫn</span>`
+      : '';
 
     a.innerHTML = `
       ${iconHtml}
       <div class="link-text">
         <div class="link-name">${item.name}</div>
         <div class="link-sub">${item.desc || ''}</div>
+        ${videoBtnHtml}
       </div>
       <div class="link-arrow">
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
