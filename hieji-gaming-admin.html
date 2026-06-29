@@ -227,7 +227,6 @@
     <div class="tab" onclick="switchTab('apps',this)">📱 App</div>
     <div class="tab" onclick="switchTab('social',this)">🔗 Mạng xã hội</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 Thống kê</div>
-    <div class="tab" onclick="switchTab('videos',this)">📹 Video HD</div>
     <div class="tab" onclick="switchTab('settings',this)">⚙️ Cài đặt</div>
   </div>
 
@@ -464,47 +463,6 @@
       </div>
     </div>
 
-    <!-- VIDEOS -->
-    <div id="panel-videos" class="panel">
-      <div class="panel-title">📹 Video hướng dẫn</div>
-      <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Thêm video YouTube hướng dẫn cho các game &amp; app. Video sẽ hiện trên trang bio với thumbnail và nút play.</p>
-        <div class="card-header"><h3>Danh sách video</h3></div>
-        <div class="item-list" id="videoList"></div>
-        <div class="add-form">
-          <div style="font-size:.85rem;font-weight:600;color:var(--c1);margin-bottom:.75rem">➕ Thêm video mới</div>
-          <div class="form-group"><label>Link YouTube</label><input type="url" id="vUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="previewVideoThumb()" /></div>
-          <!-- Video thumbnail preview -->
-          <div id="vThumbPreviewWrap" style="display:none;margin-bottom:.75rem">
-            <label style="margin-bottom:.4rem">Xem trước thumbnail</label>
-            <div style="position:relative;width:100%;max-width:320px;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
-              <img id="vThumbPreviewImg" src="" alt="" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-                <div style="width:40px;height:40px;border-radius:50%;background:rgba(124,58,237,0.85);display:flex;align-items:center;justify-content:center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="form-group"><label>Tiêu đề video</label><input type="text" id="vTitle" placeholder="Hướng dẫn chơi Free Fire cho người mới" /></div>
-          <div class="form-row">
-            <div class="form-group"><label>Mô tả ngắn</label><input type="text" id="vDesc" placeholder="Mô tả (tuỳ chọn)" /></div>
-            <div class="form-group"><label>Danh mục</label>
-              <select id="vCategory">
-                <option value="">-- Chọn --</option>
-                <option value="Game">🎮 Game</option>
-                <option value="App">📱 App</option>
-                <option value="Tips">💡 Tips</option>
-                <option value="Review">⭐ Review</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group"><label>Màu danh mục (hex)</label><input type="text" id="vCatColor" placeholder="#7c3aed" /></div>
-          <button class="btn btn-primary" style="width:auto" onclick="addVideo()">➕ Thêm video</button>
-        </div>
-      </div>
-    </div>
-
     <!-- SETTINGS -->
     <div id="panel-settings" class="panel">
       <div class="panel-title">⚙️ Cài đặt</div>
@@ -555,10 +513,6 @@ const DEFAULT_DATA = {
     { name: 'YouTube', desc: 'Subscribe kênh HieJi Gaming', url: 'https://youtube.com', icon: '▶️', color: '#ef4444', thumb: '' },
     { name: 'Facebook', desc: 'Trang chính thức', url: 'https://facebook.com', icon: '💬', color: '#3b82f6', thumb: '' },
     { name: 'TikTok', desc: 'Clip gaming ngắn', url: 'https://tiktok.com', icon: '🎵', color: '#ec4899', thumb: '' }
-  ],
-  videos: [
-    { title: 'Hướng dẫn chơi Free Fire cho người mới', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'Game', categoryColor: '#f97316' },
-    { title: 'Cách tối ưu GameBooster Pro', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'App', categoryColor: '#06b6d4' }
   ]
 };
 
@@ -807,7 +761,6 @@ async function loadData() {
     games:   result.games   ?? DEFAULT_DATA.games,
     apps:    result.apps    ?? DEFAULT_DATA.apps,
     social:  result.social  ?? DEFAULT_DATA.social,
-    videos:  result.videos  ?? DEFAULT_DATA.videos,
   };
 }
 
@@ -825,7 +778,6 @@ async function saveAll() {
     { key: 'games',   value: D.games   },
     { key: 'apps',    value: D.apps    },
     { key: 'social',  value: D.social  },
-    { key: 'videos',  value: D.videos  },
   ];
 
   const { error } = await sb.from('hieji_config').upsert(rows, { onConflict: 'key' });
@@ -927,90 +879,6 @@ function renderListForCat(cat) {
 }
 
 // ══════════════════════════════════════════════
-// VIDEOS
-// ══════════════════════════════════════════════
-function getYouTubeID(url) {
-  if (!url) return null;
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
-
-function previewVideoThumb() {
-  const url = document.getElementById('vUrl').value.trim();
-  const vid = getYouTubeID(url);
-  const wrap = document.getElementById('vThumbPreviewWrap');
-  const img  = document.getElementById('vThumbPreviewImg');
-  if (vid) {
-    img.src = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
-    wrap.style.display = 'block';
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-function renderVideoList() {
-  const el = document.getElementById('videoList');
-  el.innerHTML = '';
-  const videos = D.videos || [];
-  if (videos.length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Chưa có video nào. Thêm bên dưới.</div>';
-    return;
-  }
-  videos.forEach((v, i) => {
-    const vid = getYouTubeID(v.videoUrl);
-    const thumb = vid ? `https://img.youtube.com/vi/${vid}/default.jpg` : '';
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    row.innerHTML = `
-      ${thumb ? `<img src="${thumb}" class="item-thumb" alt="${v.title}">` : '<div class="item-icon">🎬</div>'}
-      <div class="item-info">
-        <div class="item-name">${v.title}</div>
-        <div class="item-url">${v.videoUrl || ''}</div>
-      </div>
-      <div class="item-actions">
-        ${i > 0 ? `<button class="btn btn-secondary btn-sm" onclick="moveVideo(${i},-1)">↑</button>` : ''}
-        ${i < videos.length-1 ? `<button class="btn btn-secondary btn-sm" onclick="moveVideo(${i},1)">↓</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="removeVideo(${i})">🗑</button>
-      </div>`;
-    el.appendChild(row);
-  });
-}
-
-function addVideo() {
-  const url = document.getElementById('vUrl').value.trim();
-  if (!url) { alert('Vui lòng nhập link YouTube!'); return; }
-  const title = document.getElementById('vTitle').value.trim();
-  if (!title) { alert('Vui lòng nhập tiêu đề video!'); return; }
-  const catColorMap = { Game: '#f97316', App: '#06b6d4', Tips: '#a78bfa', Review: '#f59e0b' };
-  const cat = document.getElementById('vCategory').value;
-  D.videos = D.videos || [];
-  D.videos.push({
-    title,
-    videoUrl: url,
-    desc:          document.getElementById('vDesc').value.trim(),
-    category:      cat,
-    categoryColor: document.getElementById('vCatColor').value.trim() || catColorMap[cat] || '#7c3aed',
-  });
-  ['vUrl','vTitle','vDesc','vCatColor'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('vCategory').value = '';
-  document.getElementById('vThumbPreviewWrap').style.display = 'none';
-  renderVideoList(); markChanged();
-}
-
-function removeVideo(idx) {
-  if (!confirm('Xóa video này?')) return;
-  D.videos.splice(idx, 1);
-  renderVideoList(); markChanged();
-}
-
-function moveVideo(idx, dir) {
-  const arr = D.videos; const ni = idx + dir;
-  if (ni < 0 || ni >= arr.length) return;
-  [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
-  renderVideoList(); markChanged();
-}
-
-// ══════════════════════════════════════════════
 // MUSIC
 // ══════════════════════════════════════════════
 function applyMusic() {
@@ -1081,7 +949,6 @@ function renderAdmin() {
   renderItemList('gamesList',  'games');
   renderItemList('appsList',   'apps');
   renderItemList('socialList', 'social');
-  renderVideoList();
   renderStatsEdit();
   document.getElementById('musicUrl').value    = D.music.url    || '';
   document.getElementById('musicTitle2').value = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
