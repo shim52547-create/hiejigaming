@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HieJi — Điểm Thi THPT Quốc Gia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --c1: #7c3aed; --c2: #06b6d4; --c3: #f0abfc;
+  --bg: #07070f; --card: rgba(255,255,255,0.04);
+  --border: rgba(124,58,237,0.3); --text: #f1f5f9; --muted: #94a3b8;
+}
+body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* PARTICLES */
+#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--c1); animation: float linear infinite; opacity: 0; }
+@keyframes float { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.3; } 100% { transform: translateY(-20px); opacity: 0; } }
+
+.bg-glow { position: fixed; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%); top: -200px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 0; }
+
+/* LAYOUT */
+#app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 1.5rem 1.2rem 4rem; }
+
+/* BACK */
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); text-decoration: none; letter-spacing: 1px; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-btn:hover { color: var(--c2); }
+.back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* PAGE HEADER */
+.page-header { text-align: center; margin-bottom: 2rem; }
+.page-title { font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
+.page-sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 2px; text-transform: uppercase; }
+
+/* SECTION */
+.section-label { font-size: 0.68rem; letter-spacing: 4px; text-transform: uppercase; color: var(--c1); font-weight: 700; margin-bottom: 0.8rem; margin-top: 1.8rem; }
+.section-label:first-of-type { margin-top: 0; }
+
+/* MAIN LOOKUP CARD */
+.lookup-card { background: linear-gradient(160deg, rgba(124,58,237,0.14), rgba(6,182,212,0.08)); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem; backdrop-filter: blur(12px); position: relative; overflow: hidden; }
+.lookup-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px); pointer-events: none; }
+.lookup-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(6,182,212,0.3)); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1rem; position: relative; }
+.lookup-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.3rem; position: relative; }
+.lookup-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.1rem; position: relative; }
+.lookup-input { width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem 1rem; color: var(--text); font-family: 'Orbitron', monospace; font-size: 1rem; letter-spacing: 1px; outline: none; transition: border-color 0.2s; margin-bottom: 0.7rem; position: relative; }
+.lookup-input:focus { border-color: var(--c2); }
+.lookup-input::placeholder { color: var(--muted); font-family: 'Rajdhani', sans-serif; letter-spacing: normal; }
+.lookup-btn { width: 100%; background: linear-gradient(135deg, var(--c1), var(--c2)); border: none; border-radius: 12px; padding: 0.85rem; color: #fff; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.15s, box-shadow 0.2s; box-shadow: 0 0 20px rgba(124,58,237,0.35); position: relative; }
+.lookup-btn:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(124,58,237,0.5); }
+.lookup-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
+.lookup-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.5; position: relative; }
+
+/* LINK GRID */
+.link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.mini-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 0.9rem; text-decoration: none; color: var(--text); display: flex; flex-direction: column; gap: 0.4rem; transition: border-color 0.2s, transform 0.15s, background 0.2s; }
+.mini-card:hover { border-color: var(--c2); background: rgba(6,182,212,0.08); transform: translateY(-2px); }
+.mini-icon { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(6,182,212,0.25)); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-family: 'Orbitron', monospace; font-weight: 900; }
+.mini-name { font-size: 0.85rem; font-weight: 700; }
+.mini-sub { font-size: 0.68rem; color: var(--muted); }
+
+/* PROVINCE PICKER */
+.province-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.1rem; }
+.province-row { display: flex; gap: 0.6rem; }
+.province-select { flex: 1; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 12px; padding: 0.7rem 0.8rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; outline: none; }
+.province-select:focus { border-color: var(--c2); }
+.province-go { background: linear-gradient(135deg, var(--c1), var(--c2)); border: none; border-radius: 12px; padding: 0 1.1rem; color: #fff; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; flex-shrink: 0; }
+.province-go:hover { transform: scale(1.05); }
+.province-go svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; }
+.province-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.6rem; }
+
+/* INFO BOX */
+.info-box { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.25); border-radius: 14px; padding: 1rem 1.1rem; font-size: 0.8rem; color: var(--muted); line-height: 1.6; display: flex; gap: 0.7rem; }
+.info-box .ic { flex-shrink: 0; font-size: 1.1rem; }
+
+.footer-note { text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.2); margin-top: 2.2rem; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="particles"></div>
+
+<div id="app">
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Về trang chủ
+  </a>
+
+  <div class="page-header">
+    <div class="page-title">ĐIỂM THI THPT</div>
+    <div class="page-sub">Tra cứu điểm thi tốt nghiệp THPT Quốc gia</div>
+  </div>
+
+  <!-- OFFICIAL LOOKUP -->
+  <div class="section-label">🏛️ Cổng chính thức</div>
+  <div class="lookup-card">
+    <div class="lookup-icon">📝</div>
+    <div class="lookup-title">Bộ Giáo dục &amp; Đào tạo</div>
+    <div class="lookup-desc">Nhập số báo danh để mở cổng tra cứu điểm thi chính thức. Bạn sẽ cần nhập thêm mã xác nhận trên trang của Bộ để xem kết quả.</div>
+    <input type="text" id="sbdInput" class="lookup-input" placeholder="Nhập số báo danh của bạn" inputmode="numeric" maxlength="10">
+    <button class="lookup-btn" onclick="goOfficial()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      TRA CỨU NGAY
+    </button>
+    <div class="lookup-note">⚠️ HieJi Gaming không lưu trữ hay xử lý số báo danh của bạn — nút trên chỉ mở trực tiếp cổng tra cứu chính thức của Bộ GD&ĐT trong tab mới.</div>
+  </div>
+
+  <!-- PROVINCE LOOKUP -->
+  <div class="section-label">📍 Tra cứu theo tỉnh / thành</div>
+  <div class="province-card">
+    <div class="province-row">
+      <select id="provinceSelect" class="province-select"></select>
+      <button class="province-go" onclick="goProvince()" aria-label="Đi tới">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="province-hint">Chọn Sở GD&ĐT nơi bạn đăng ký dự thi để tra cứu trực tiếp trên cổng của tỉnh/thành đó.</div>
+  </div>
+
+  <!-- PRESS LOOKUP -->
+  <div class="section-label">📰 Tra cứu qua báo chí</div>
+  <div class="link-grid">
+    <a href="https://diemthi.vnexpress.net/" target="_blank" rel="noopener" class="mini-card">
+      <div class="mini-icon">VE</div>
+      <div class="mini-name">VnExpress</div>
+      <div class="mini-sub">diemthi.vnexpress.net</div>
+    </a>
+    <a href="https://tuoitre.vn/diem-thi.htm" target="_blank" rel="noopener" class="mini-card">
+      <div class="mini-icon">TT</div>
+      <div class="mini-name">Tuổi Trẻ</div>
+      <div class="mini-sub">tuoitre.vn</div>
+    </a>
+    <a href="https://thanhnien.vn/tra-cuu-diem-thi.htm" target="_blank" rel="noopener" class="mini-card">
+      <div class="mini-icon">TN</div>
+      <div class="mini-name">Thanh Niên</div>
+      <div class="mini-sub">thanhnien.vn</div>
+    </a>
+    <a href="https://vietnamnet.vn/giao-duc/diem-thi/tra-cuu-diem-thi-tot-nghiep-thpt" target="_blank" rel="noopener" class="mini-card">
+      <div class="mini-icon">VN</div>
+      <div class="mini-name">VietNamNet</div>
+      <div class="mini-sub">vietnamnet.vn</div>
+    </a>
+  </div>
+
+  <div class="section-label">ℹ️ Lưu ý</div>
+  <div class="info-box">
+    <div class="ic">💡</div>
+    <div>Điểm thi tra cứu trên các trang chỉ mang tính tham khảo. Kết quả chính thức, dùng để xét tốt nghiệp và xét tuyển đại học, được lấy từ hệ thống của Bộ Giáo dục &amp; Đào tạo và Sở GD&ĐT nơi bạn dự thi.</div>
+  </div>
+
+  <div class="footer-note">HieJi Gaming © 2025</div>
+</div>
+
+<script>
+// ── PARTICLES ──
+(function spawnParticles() {
+  const container = document.getElementById('particles');
+  const colors = ['#7c3aed','#06b6d4','#f0abfc','#818cf8'];
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay   = (Math.random() * 10) + 's';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+})();
+
+// ── OFFICIAL PORTAL ──
+const OFFICIAL_URL = 'https://tracuudiem.thitotnghiepthpt.edu.vn/';
+function goOfficial() {
+  // Cổng chính thức yêu cầu nhập số báo danh + mã xác nhận ngay trên trang của Bộ,
+  // nên ở đây chỉ mở thẳng cổng tra cứu để thí sinh nhập tiếp.
+  window.open(OFFICIAL_URL, '_blank', 'noopener');
+}
+document.getElementById('sbdInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goOfficial();
+});
+
+// ── PROVINCE PORTALS ──
+const PROVINCES = [
+  ['Hà Nội', 'https://tracuu.hanoi.edu.vn/'],
+  ['Cao Bằng', 'https://tradiem.khaothicaobang.edu.vn/'],
+  ['Tuyên Quang', 'http://diemthi.tuyenquang.edu.vn/'],
+  ['Điện Biên', 'https://tracuudiem.dienbien.edu.vn/'],
+  ['Lai Châu', 'http://diemthithpt.laichau.edu.vn'],
+  ['Sơn La', 'http://diemthitotnghiep.sogddt.sonla.gov.vn'],
+  ['Lào Cai', 'http://diemthi.laocai.edu.vn'],
+  ['Thái Nguyên', 'https://diemthi.thainguyen.edu.vn'],
+  ['Lạng Sơn', 'http://tracuudiem.langson.edu.vn'],
+  ['Quảng Ninh', 'https://diemthi.quangninh.edu.vn/'],
+  ['Bắc Ninh', 'http://diemthi.bacninh.edu.vn'],
+  ['Phú Thọ', 'https://tracuudiem.phutho.edu.vn/'],
+  ['Hải Phòng', 'http://diemthithpt.haiphong.gov.vn/'],
+  ['Hưng Yên', 'http://diemthi.hungyen.edu.vn/'],
+  ['Ninh Bình', 'https://tracuudiemnb.ninhbinh.edu.vn/'],
+  ['Thanh Hóa', 'http://thitn.thanhhoa.edu.vn'],
+  ['Nghệ An', 'https://giaoducso.nghean.gov.vn/trang-chu/tra-cuu-diem-thi'],
+  ['Hà Tĩnh', 'http://tracuudiemthi.hatinh.edu.vn/'],
+  ['Quảng Trị', 'https://diemthi.quangtri.edu.vn/'],
+  ['Huế', 'http://tracuudiem2.thuathienhue.edu.vn/'],
+  ['Đà Nẵng', 'https://tracuudiem.danang.gov.vn'],
+  ['Quảng Ngãi', 'https://diemthi.quangngai.edu.vn'],
+  ['Gia Lai', 'http://diemthi.gialai.edu.vn:8080'],
+  ['Khánh Hòa', 'http://diemthi.khanhhoa.edu.vn/'],
+  ['Đắk Lắk', 'https://diemthi.daklak.edu.vn/'],
+  ['Lâm Đồng', 'https://diemthi.lamdongtructuyen.vn/'],
+  ['Đồng Nai', 'https://tracuudiem.dongnai.edu.vn/'],
+  ['TP. Hồ Chí Minh', 'https://diemthi.hcm.edu.vn'],
+  ['Tây Ninh', 'https://tracuudiem2026.tayninh.edu.vn'],
+  ['Đồng Tháp', 'http://tracuudiem.dongthap.edu.vn'],
+  ['Vĩnh Long', 'http://tracuudiem.vinhlong.edu.vn/'],
+  ['An Giang', 'https://tracuu.angiang.edu.vn/'],
+  ['Cần Thơ', 'https://diemthithpt.ctu.edu.vn'],
+  ['Cà Mau', 'http://diemthithpt.camau.edu.vn/']
+];
+
+const sel = document.getElementById('provinceSelect');
+PROVINCES.forEach(([name, url]) => {
+  const opt = document.createElement('option');
+  opt.value = url;
+  opt.textContent = name;
+  sel.appendChild(opt);
+});
+
+function goProvince() {
+  const url = sel.value;
+  if (url) window.open(url, '_blank', 'noopener');
+}
+</script>
+</body>
+</html>
