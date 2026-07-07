@@ -228,6 +228,8 @@
     <div class="tab" onclick="switchTab('social',this)">🔗 Mạng xã hội</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 Thống kê</div>
     <div class="tab" onclick="switchTab('videos',this)">📹 Video HD</div>
+    <div class="tab" onclick="switchTab('effects',this)">✨ Hiệu ứng</div>
+    <div class="tab" onclick="switchTab('donate',this)">💰 Ủng hộ</div>
     <div class="tab" onclick="switchTab('settings',this)">⚙️ Cài đặt</div>
   </div>
 
@@ -531,6 +533,89 @@
       </div>
     </div>
 
+    <!-- EFFECTS (Cursor FX) -->
+    <div id="panel-effects" class="panel">
+      <div class="panel-title">✨ Hiệu ứng con trỏ chuột</div>
+      <div class="card">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Hiệu ứng đuôi hạt đi theo chuột trên trang bio (tự tắt trên di động &amp; khi bật giảm chuyển động).</p>
+        <div class="form-group" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">
+          <input type="checkbox" id="cursorEnabled" style="width:auto" onchange="updateCursorField('enabled', this.checked)">
+          <label style="margin:0;text-transform:none;font-size:.95rem;color:var(--text)">Bật hiệu ứng con trỏ chuột</label>
+        </div>
+        <div class="form-group">
+          <label>Kiểu hiệu ứng</label>
+          <select id="cursorStyle" onchange="updateCursorField('style', this.value)">
+            <option value="sparkle">✨ Sparkle — hạt sao lấp lánh</option>
+            <option value="comet">☄️ Comet — đuôi sao chổi mượt</option>
+            <option value="pixel">🟪 Pixel — bụi pixel retro</option>
+            <option value="rainbow">🌈 Rainbow — trail đổi màu</option>
+            <option value="custom">🖼 Custom — ảnh tự chọn</option>
+          </select>
+        </div>
+        <div id="cursorCustomUploadWrap" style="display:none">
+          <label style="margin-bottom:.5rem">Ảnh con trỏ tuỳ chỉnh (PNG nền trong suốt)</label>
+          <div class="thumb-upload-row">
+            <div class="thumb-preview" id="cursorThumbPreview" onclick="document.getElementById('cursorThumbInput').click()">🖱️</div>
+            <div class="thumb-upload-info">
+              <strong>Bấm vào ô bên trái để chọn ảnh</strong>
+              PNG nền trong suốt khuyến nghị · Tối đa 3MB.
+              <div class="upload-progress" id="cursorThumbProgress" style="display:none"><div class="upload-progress-bar" id="cursorThumbBar"></div></div>
+            </div>
+          </div>
+          <input type="file" id="cursorThumbInput" accept="image/*" onchange="handleCursorCustomFile(this.files[0])">
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;margin-bottom:0">
+          <input type="checkbox" id="cursorSfx" style="width:auto" onchange="updateCursorField('sfx', this.checked)">
+          <label style="margin:0;text-transform:none;font-size:.95rem;color:var(--text)">Bật âm thanh nhỏ khi hover / click</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- DONATE -->
+    <div id="panel-donate" class="panel">
+      <div class="panel-title">💰 Ủng hộ</div>
+      <div class="card">
+        <div class="form-group" style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">
+          <input type="checkbox" id="donateEnabled" style="width:auto" onchange="updateDonateField('enabled', this.checked)">
+          <label style="margin:0;text-transform:none;font-size:.95rem;color:var(--text)">Hiện nút ủng hộ trên trang bio</label>
+        </div>
+        <div class="form-group">
+          <label>Lời nhắn cảm ơn</label>
+          <textarea id="donateMessage" rows="2" oninput="updateDonateField('message', this.value)" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.9rem;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.95rem;outline:none;resize:vertical"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngân hàng</label>
+            <select id="donateBankSelect" onchange="updateDonateBank(this.value)">
+              <option value="">-- Chọn ngân hàng --</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Số tài khoản</label><input type="text" id="donateAccountNumber" placeholder="0123456789" oninput="updateDonateField('accountNumber', this.value.trim())"></div>
+        </div>
+        <div class="form-group"><label>Tên chủ tài khoản</label><input type="text" id="donateAccountName" placeholder="NGUYEN VAN A (không dấu, IN HOA)" oninput="updateDonateField('accountName', this.value.toUpperCase())"></div>
+
+        <div style="margin-top:1rem">
+          <label style="margin-bottom:.5rem">Xem trước mã QR</label>
+          <div id="donateQrPreviewWrap" style="display:flex;justify-content:center;padding:1rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px">
+            <img id="donateQrPreview" src="" alt="QR preview" style="width:200px;height:200px;object-fit:contain;display:none;border-radius:8px;background:#fff">
+            <div id="donateQrPlaceholder" style="color:var(--muted);font-size:.85rem;text-align:center">Nhập ngân hàng &amp; số tài khoản để xem QR</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem">
+          <div class="card-header"><h3>Phương thức khác (Momo, ZaloPay...)</h3></div>
+          <div class="item-list" id="donateExtraList"></div>
+          <div class="add-form">
+            <div class="form-row">
+              <div class="form-group"><label>Tên (vd: Momo)</label><input type="text" id="donateExtraLabel" placeholder="Momo"></div>
+              <div class="form-group"><label>Số / giá trị</label><input type="text" id="donateExtraValue" placeholder="0909xxxxxx"></div>
+            </div>
+            <button class="btn btn-primary" style="width:auto" onclick="addDonateExtra()">➕ Thêm phương thức</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SETTINGS -->
     <div id="panel-settings" class="panel">
       <div class="panel-title">⚙️ Cài đặt</div>
@@ -585,11 +670,61 @@ const DEFAULT_DATA = {
   videos: [
     { title: 'Hướng dẫn chơi Free Fire cho người mới', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'Game', categoryColor: '#f97316' },
     { title: 'Cách tối ưu GameBooster Pro', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', desc: '', category: 'App', categoryColor: '#06b6d4' }
-  ]
+  ],
+  cursor: { enabled: false, style: 'sparkle', customUrl: '', sfx: false },
+  donate: {
+    enabled: false,
+    message: 'Ủng hộ mình duy trì kênh nhé 💜',
+    bankBin: '', bankName: '', accountNumber: '', accountName: '',
+    extra: []
+  }
 };
+
+// Danh sách ngân hàng phổ biến hỗ trợ VietQR (BIN code)
+const VIETQR_BANKS = [
+  { bin: '970436', name: 'Vietcombank' },
+  { bin: '970422', name: 'MB Bank' },
+  { bin: '970407', name: 'Techcombank' },
+  { bin: '970416', name: 'ACB' },
+  { bin: '970423', name: 'TPBank' },
+  { bin: '970418', name: 'BIDV' },
+  { bin: '970415', name: 'VietinBank' },
+  { bin: '970405', name: 'Agribank' },
+  { bin: '970432', name: 'VPBank' },
+  { bin: '970403', name: 'Sacombank' },
+  { bin: '970437', name: 'HDBank' },
+  { bin: '970441', name: 'VIB' },
+  { bin: '970443', name: 'SHB' },
+  { bin: '970448', name: 'OCB' },
+  { bin: '970431', name: 'Eximbank' },
+  { bin: '970454', name: 'VietCapitalBank' },
+  { bin: '970449', name: 'BacABank' },
+  { bin: '970400', name: 'SaigonBank' },
+  { bin: '970426', name: 'MSB' },
+  { bin: '970429', name: 'SCB' },
+  { bin: '970425', name: 'ABBANK' },
+  { bin: '970414', name: 'Oceanbank' },
+  { bin: '970458', name: 'UnitedOverseas(UOB)' },
+  { bin: '970419', name: 'NCB' },
+  { bin: '970452', name: 'KienLongBank' },
+  { bin: '970430', name: 'PGBank' },
+  { bin: '970457', name: 'Woori' },
+  { bin: '970438', name: 'BaoVietBank' },
+  { bin: '970446', name: 'CoopBank' },
+  { bin: '970427', name: 'VietABank' },
+  { bin: '970412', name: 'PVcomBank' },
+  { bin: '970433', name: 'VietBank' },
+  { bin: '970439', name: 'PublicBank(PBVN)' },
+  { bin: '970462', name: 'VRB' },
+  { bin: '970440', name: 'SeABank' },
+  { bin: '970424', name: 'ShinhanBank' },
+  { bin: '546034', name: 'CIMB' },
+  { bin: '970442', name: 'HongLeong' }
+];
 
 let D = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let currentUser = null;
+populateBankSelect();
 
 // ══════════════════════════════════════════════
 // AUTH
@@ -898,6 +1033,152 @@ function resetThumbForm(prefix) {
 }
 
 // ══════════════════════════════════════════════
+// CURSOR FX (admin panel)
+// ══════════════════════════════════════════════
+function updateCursorField(field, value) {
+  D.cursor = D.cursor || JSON.parse(JSON.stringify(DEFAULT_DATA.cursor));
+  D.cursor[field] = value;
+  if (field === 'style') renderCursorPanel();
+  markChanged();
+}
+
+async function handleCursorCustomFile(file) {
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 3MB.'); return; }
+  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('cursorThumbPreview').innerHTML = `<img src="${e.target.result}" alt="cursor preview">`;
+  };
+  reader.readAsDataURL(file);
+
+  const prog = document.getElementById('cursorThumbProgress');
+  prog.style.display = 'block';
+
+  try {
+    const url = await uploadImage(file, 'cursors', 'cursorThumbBar');
+    D.cursor.customUrl = url;
+    setTimeout(() => { prog.style.display = 'none'; }, 1800);
+    markChanged();
+  } catch (err) {
+    alert('Lỗi upload ảnh con trỏ: ' + err.message);
+    prog.style.display = 'none';
+  }
+}
+
+function renderCursorPanel() {
+  const c = D.cursor || JSON.parse(JSON.stringify(DEFAULT_DATA.cursor));
+  document.getElementById('cursorEnabled').checked = !!c.enabled;
+  document.getElementById('cursorStyle').value = c.style || 'sparkle';
+  document.getElementById('cursorSfx').checked = !!c.sfx;
+  document.getElementById('cursorCustomUploadWrap').style.display = (c.style === 'custom') ? 'block' : 'none';
+  const preview = document.getElementById('cursorThumbPreview');
+  preview.innerHTML = c.customUrl ? `<img src="${c.customUrl}" alt="cursor preview">` : '🖱️';
+}
+
+// ══════════════════════════════════════════════
+// DONATE (admin panel)
+// ══════════════════════════════════════════════
+function populateBankSelect() {
+  const sel = document.getElementById('donateBankSelect');
+  VIETQR_BANKS.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.bin;
+    opt.textContent = b.name;
+    sel.appendChild(opt);
+  });
+}
+
+function updateDonateField(field, value) {
+  D.donate = D.donate || JSON.parse(JSON.stringify(DEFAULT_DATA.donate));
+  D.donate[field] = value;
+  refreshDonateQrPreview();
+  markChanged();
+}
+
+function updateDonateBank(bin) {
+  D.donate = D.donate || JSON.parse(JSON.stringify(DEFAULT_DATA.donate));
+  D.donate.bankBin = bin;
+  const bank = VIETQR_BANKS.find(b => b.bin === bin);
+  D.donate.bankName = bank ? bank.name : '';
+  refreshDonateQrPreview();
+  markChanged();
+}
+
+function refreshDonateQrPreview() {
+  const d = D.donate || {};
+  const img = document.getElementById('donateQrPreview');
+  const placeholder = document.getElementById('donateQrPlaceholder');
+  if (d.bankBin && d.accountNumber) {
+    const addInfo = encodeURIComponent(d.message || '');
+    const accName = encodeURIComponent(d.accountName || '');
+    img.src = `https://img.vietqr.io/image/${d.bankBin}-${d.accountNumber}-compact2.png?addInfo=${addInfo}&accountName=${accName}`;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+    placeholder.style.display = 'block';
+  }
+}
+
+function renderDonateExtraList() {
+  const el = document.getElementById('donateExtraList');
+  el.innerHTML = '';
+  const extra = (D.donate && D.donate.extra) || [];
+  if (extra.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.85rem;padding:.5rem 0">Chưa có phương thức nào. Thêm bên dưới.</div>';
+    return;
+  }
+  extra.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <div class="item-icon">💳</div>
+      <div class="item-info">
+        <div class="item-name">${item.label}</div>
+        <div class="item-url">${item.value}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-danger btn-sm" onclick="removeDonateExtra(${i})">🗑</button>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+function addDonateExtra() {
+  const label = document.getElementById('donateExtraLabel').value.trim();
+  const value = document.getElementById('donateExtraValue').value.trim();
+  if (!label || !value) { alert('Vui lòng nhập đủ tên và số/giá trị!'); return; }
+  D.donate = D.donate || JSON.parse(JSON.stringify(DEFAULT_DATA.donate));
+  D.donate.extra = D.donate.extra || [];
+  D.donate.extra.push({ label, value });
+  document.getElementById('donateExtraLabel').value = '';
+  document.getElementById('donateExtraValue').value = '';
+  renderDonateExtraList();
+  markChanged();
+}
+
+function removeDonateExtra(idx) {
+  if (!confirm('Xóa phương thức này?')) return;
+  D.donate.extra.splice(idx, 1);
+  renderDonateExtraList();
+  markChanged();
+}
+
+function renderDonatePanel() {
+  const d = D.donate || JSON.parse(JSON.stringify(DEFAULT_DATA.donate));
+  document.getElementById('donateEnabled').checked = !!d.enabled;
+  document.getElementById('donateMessage').value = d.message || '';
+  document.getElementById('donateBankSelect').value = d.bankBin || '';
+  document.getElementById('donateAccountNumber').value = d.accountNumber || '';
+  document.getElementById('donateAccountName').value = d.accountName || '';
+  refreshDonateQrPreview();
+  renderDonateExtraList();
+}
+
+// ══════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════
 async function loadData() {
@@ -914,6 +1195,8 @@ async function loadData() {
     apps:    result.apps    ?? DEFAULT_DATA.apps,
     social:  result.social  ?? DEFAULT_DATA.social,
     videos:  result.videos  ?? DEFAULT_DATA.videos,
+    cursor:  result.cursor  ?? DEFAULT_DATA.cursor,
+    donate:  result.donate  ?? DEFAULT_DATA.donate,
   };
 }
 
@@ -932,6 +1215,8 @@ async function saveAll() {
     { key: 'apps',    value: D.apps    },
     { key: 'social',  value: D.social  },
     { key: 'videos',  value: D.videos  },
+    { key: 'cursor',  value: D.cursor  },
+    { key: 'donate',  value: D.donate  },
   ];
 
   const { error } = await sb.from('hieji_config').upsert(rows, { onConflict: 'key' });
@@ -1194,6 +1479,8 @@ function renderAdmin() {
   renderItemList('socialList', 'social');
   renderVideoList();
   renderStatsEdit();
+  renderCursorPanel();
+  renderDonatePanel();
   document.getElementById('musicUrl').value    = D.music.url    || '';
   document.getElementById('musicTitle2').value = D.music.title !== 'Chưa có nhạc' ? D.music.title : '';
   document.getElementById('musicSource').value = D.music.source || '';
