@@ -58,7 +58,18 @@
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-size: cover; background-position: center center;
     background-repeat: no-repeat; background-attachment: fixed;
-    transition: opacity 0.8s ease;
+    transition: opacity 0.8s ease; overflow: hidden;
+  }
+  #site-bg-video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: none;
+  }
+  #site-bg-yt {
+    position: absolute; top: 50%; left: 50%;
+    width: 177.78vh; height: 56.25vw; /* giữ tỉ lệ 16:9 để phủ kín màn hình */
+    min-width: 100%; min-height: 100%;
+    transform: translate(-50%, -50%);
+    border: 0; display: none; pointer-events: none;
   }
   #site-bg-overlay {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -300,7 +311,10 @@
 </div>
 
 <!-- BACKGROUND -->
-<div id="site-bg"></div>
+<div id="site-bg">
+  <video id="site-bg-video" autoplay muted loop playsinline></video>
+  <iframe id="site-bg-yt" src="" allow="autoplay; encrypted-media" title="background video"></iframe>
+</div>
 <div id="site-bg-overlay"></div>
 
 <!-- PARTICLES -->
@@ -450,7 +464,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEFAULT_DATA = {
   profile: { avatarUrl: '' },
-  bg: { url: '', opacity: 50 },
+  bg: { url: '', opacity: 50, type: 'image' },
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
@@ -499,18 +513,55 @@ async function loadFromSupabase() {
 
 // ── BACKGROUND ──
 let currentBgData = null;
+function extractYouTubeId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function getBgKind(bg) {
+  if (!bg || !bg.url) return 'none';
+  if (bg.type === 'youtube' || /youtube\.com|youtu\.be/i.test(bg.url)) return 'youtube';
+  if (bg.type === 'video') return 'video';
+  if (bg.type === 'image') return 'image';
+  return /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(bg.url) ? 'video' : 'image';
+}
 function applyBg(bg) {
   currentBgData = bg || { url: '', opacity: 50 };
   const bgEl      = document.getElementById('site-bg');
+  const videoEl   = document.getElementById('site-bg-video');
+  const ytEl      = document.getElementById('site-bg-yt');
   const overlayEl = document.getElementById('site-bg-overlay');
-  if (bg && bg.url) {
-    bgEl.style.backgroundImage = `url('${bg.url}')`;
-    const opacity = (bg.opacity ?? 50) / 100;
-    const overlayBase = document.body.getAttribute('data-theme') === 'light' ? '243,241,251' : '7,7,15';
-    overlayEl.style.background = `rgba(${overlayBase},${opacity})`;
-  } else {
-    bgEl.style.backgroundImage = 'none';
+  const overlayBase = document.body.getAttribute('data-theme') === 'light' ? '243,241,251' : '7,7,15';
+
+  // Reset all layers first
+  bgEl.style.backgroundImage = 'none';
+  videoEl.pause();
+  videoEl.removeAttribute('src');
+  videoEl.load();
+  videoEl.style.display = 'none';
+  ytEl.style.display = 'none';
+  ytEl.src = '';
+
+  if (!bg || !bg.url) {
     overlayEl.style.background = 'transparent';
+    return;
+  }
+
+  const opacity = (bg.opacity ?? 50) / 100;
+  overlayEl.style.background = `rgba(${overlayBase},${opacity})`;
+
+  const kind = getBgKind(bg);
+  if (kind === 'youtube') {
+    const id = extractYouTubeId(bg.url);
+    if (id) {
+      ytEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0&playsinline=1`;
+      ytEl.style.display = 'block';
+    }
+  } else if (kind === 'video') {
+    videoEl.setAttribute('src', bg.url);
+    videoEl.style.display = 'block';
+    videoEl.play().catch(() => {});
+  } else {
+    bgEl.style.backgroundImage = `url('${bg.url}')`;
   }
 }
 
