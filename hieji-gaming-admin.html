@@ -154,7 +154,7 @@
   }
   .bg-preview-box:hover { border-color: var(--c1); }
   .bg-preview-box.drag-over { border-color: var(--c2); outline: 2px dashed var(--c2); }
-  .bg-preview-img {
+  .bg-preview-img, .bg-preview-video {
     width: 100%; height: 100%; object-fit: cover; display: block;
   }
   .bg-preview-overlay {
@@ -275,19 +275,21 @@
 
     <!-- BACKGROUND -->
     <div id="panel-bg" class="panel">
-      <div class="panel-title">🖼 Ảnh nền trang bio</div>
+      <div class="panel-title">🖼 Ảnh / Video nền trang bio</div>
       <div class="card">
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Ảnh nền sẽ trải đầy toàn trang bio. Khuyến nghị ảnh ngang (1920×1080 hoặc rộng hơn). Bạn có thể điều chỉnh độ tối để chữ dễ đọc.</p>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.25rem">Nền sẽ trải đầy toàn trang bio, có thể là ảnh tĩnh hoặc video (tự động phát, lặp lại, tắt tiếng). Khuyến nghị nội dung ngang (1920×1080 hoặc rộng hơn). Bạn có thể điều chỉnh độ tối để chữ dễ đọc.</p>
 
         <!-- Live preview giả lập trang bio -->
         <div class="bg-preview-box" id="bgDropZone"
              onclick="document.getElementById('bgFileInput').click()"
              ondragover="bgDragOver(event)" ondragleave="bgDragLeave(event)" ondrop="bgDrop(event)">
           <img id="bgPreviewImg" class="bg-preview-img" src="" alt="" style="display:none">
+          <video id="bgPreviewVideo" class="bg-preview-video" src="" style="display:none" muted loop autoplay playsinline></video>
+          <iframe id="bgPreviewYt" class="bg-preview-video" src="" style="display:none;border:0" allow="autoplay"></iframe>
           <div class="bg-preview-overlay" id="bgPreviewOverlay" style="--ov:0.5">
             <div id="bgPreviewNoImg" class="bg-preview-no-img">
               <span>🖼</span>
-              <p>Bấm hoặc kéo thả ảnh để xem trước</p>
+              <p>Bấm hoặc kéo thả ảnh/video để xem trước</p>
             </div>
             <div id="bgPreviewContent" style="display:none;text-align:center">
               <div class="bg-preview-label">Gaming Creator</div>
@@ -296,7 +298,23 @@
             </div>
           </div>
         </div>
-        <input type="file" id="bgFileInput" accept="image/*" onchange="handleBgFile(this.files[0])">
+        <input type="file" id="bgFileInput" accept="image/*,video/*" onchange="handleBgFile(this.files[0])">
+
+        <!-- Paste link option -->
+        <div class="form-group" style="margin-top:.25rem">
+          <label>Hoặc dán link ảnh / video (.mp4) / YouTube</label>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <input type="url" id="bgLinkInput" placeholder="https://... hoặc https://youtube.com/watch?v=..." style="flex:1;min-width:220px">
+            <select id="bgLinkType" style="width:auto">
+              <option value="auto">Tự nhận diện</option>
+              <option value="image">Ảnh</option>
+              <option value="video">Video (mp4/webm)</option>
+              <option value="youtube">YouTube</option>
+            </select>
+            <button class="btn btn-secondary" style="width:auto" onclick="useBgLink()">✅ Dùng link này</button>
+          </div>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:.4rem">Link YouTube sẽ tự động phát, lặp lại và tắt tiếng làm nền (video phải công khai/không giới hạn nhúng).</p>
+        </div>
 
         <!-- Opacity slider -->
         <div class="opacity-slider-wrap">
@@ -313,13 +331,13 @@
 
         <!-- URL readonly -->
         <div class="form-group">
-          <label>URL ảnh nền hiện tại</label>
-          <input type="url" id="bgUrl" placeholder="https://... (tự động điền sau khi upload)" readonly style="cursor:default;opacity:.7" />
+          <label>URL ảnh/video nền hiện tại</label>
+          <input type="url" id="bgUrl" placeholder="https://... (tự động điền sau khi upload hoặc dán link)" readonly style="cursor:default;opacity:.7" />
         </div>
 
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
-          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('bgFileInput').click()">🖼 Chọn ảnh nền</button>
-          <button class="btn btn-danger" onclick="removeBg()">🗑 Xóa ảnh nền (dùng nền tối mặc định)</button>
+          <button class="btn btn-primary" style="width:auto" onclick="document.getElementById('bgFileInput').click()">📤 Tải ảnh/video lên</button>
+          <button class="btn btn-danger" onclick="removeBg()">🗑 Xóa nền (dùng nền tối mặc định)</button>
         </div>
       </div>
     </div>
@@ -545,7 +563,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const DEFAULT_DATA = {
   profile: { avatarUrl: '' },
-  bg: { url: '', opacity: 50 },
+  bg: { url: '', opacity: 50, type: 'image' },
   music: { url: '', title: 'Chưa có nhạc', source: '' },
   stats: [
     { label: 'Videos', value: '120+' },
@@ -681,17 +699,61 @@ function bgDragOver(e)  { e.preventDefault(); document.getElementById('bgDropZon
 function bgDragLeave()  { document.getElementById('bgDropZone').classList.remove('drag-over'); }
 function bgDrop(e)      { e.preventDefault(); bgDragLeave(); const f = e.dataTransfer.files[0]; if (f) handleBgFile(f); }
 
+function extractYouTubeId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function detectBgTypeFromUrl(url) {
+  if (/youtube\.com|youtu\.be/i.test(url)) return 'youtube';
+  if (/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(url)) return 'video';
+  return 'image';
+}
+
+function useBgLink() {
+  const url = document.getElementById('bgLinkInput').value.trim();
+  if (!url) { alert('Vui lòng dán link trước.'); return; }
+  let type = document.getElementById('bgLinkType').value;
+  if (type === 'auto') type = detectBgTypeFromUrl(url);
+  if (type === 'youtube' && !extractYouTubeId(url)) {
+    alert('Không nhận diện được ID video từ link YouTube này. Vui lòng kiểm tra lại link.');
+    return;
+  }
+  D.bg.url = url;
+  D.bg.type = type;
+  document.getElementById('bgFileInput').value = '';
+  renderBgPanel();
+  markChanged();
+}
+
 async function handleBgFile(file) {
   if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { alert('Ảnh quá lớn! Tối đa 10MB.'); return; }
-  if (!file.type.startsWith('image/')) { alert('Vui lòng chọn file ảnh.'); return; }
+  const isVideo = file.type.startsWith('video/');
+  const isImage = file.type.startsWith('image/');
+  if (!isVideo && !isImage) { alert('Vui lòng chọn file ảnh hoặc video.'); return; }
+  const maxSize = isVideo ? 30 * 1024 * 1024 : 10 * 1024 * 1024;
+  if (file.size > maxSize) { alert(isVideo ? 'Video quá lớn! Tối đa 30MB.' : 'Ảnh quá lớn! Tối đa 10MB.'); return; }
+
+  D.bg.type = isVideo ? 'video' : 'image';
+
+  const img = document.getElementById('bgPreviewImg');
+  const video = document.getElementById('bgPreviewVideo');
 
   // Local preview instantly
   const reader = new FileReader();
   reader.onload = ev => {
-    const img = document.getElementById('bgPreviewImg');
-    img.src = ev.target.result;
-    img.style.display = 'block';
+    if (isVideo) {
+      img.style.display = 'none';
+      img.src = '';
+      video.src = ev.target.result;
+      video.style.display = 'block';
+    } else {
+      video.style.display = 'none';
+      video.removeAttribute('src');
+      video.load();
+      img.src = ev.target.result;
+      img.style.display = 'block';
+    }
     document.getElementById('bgPreviewNoImg').style.display = 'none';
     document.getElementById('bgPreviewContent').style.display = 'block';
   };
@@ -725,10 +787,19 @@ function updateBgOpacity(val) {
 }
 
 function removeBg() {
-  D.bg = { url: '', opacity: 50 };
+  D.bg = { url: '', opacity: 50, type: 'image' };
   document.getElementById('bgUrl').value = '';
+  document.getElementById('bgLinkInput').value = '';
+  document.getElementById('bgLinkType').value = 'auto';
   document.getElementById('bgPreviewImg').style.display = 'none';
   document.getElementById('bgPreviewImg').src = '';
+  const video = document.getElementById('bgPreviewVideo');
+  video.style.display = 'none';
+  video.removeAttribute('src');
+  video.load();
+  const yt = document.getElementById('bgPreviewYt');
+  yt.style.display = 'none';
+  yt.src = '';
   document.getElementById('bgPreviewNoImg').style.display = 'flex';
   document.getElementById('bgPreviewContent').style.display = 'none';
   document.getElementById('bgOpacity').value = 50;
@@ -738,22 +809,49 @@ function removeBg() {
   markChanged();
 }
 
+function getBgKind(bg) {
+  if (!bg || !bg.url) return 'none';
+  if (bg.type === 'youtube' || /youtube\.com|youtu\.be/i.test(bg.url)) return 'youtube';
+  if (bg.type === 'video') return 'video';
+  if (bg.type === 'image') return 'image';
+  return detectBgTypeFromUrl(bg.url);
+}
+
 function renderBgPanel() {
-  const bg = D.bg || { url: '', opacity: 50 };
+  const bg = D.bg || { url: '', opacity: 50, type: 'image' };
   const opacity = bg.opacity ?? 50;
   document.getElementById('bgUrl').value = bg.url || '';
+  document.getElementById('bgLinkInput').value = bg.url || '';
+  document.getElementById('bgLinkType').value = (bg.type && ['image','video','youtube'].includes(bg.type)) ? bg.type : 'auto';
   document.getElementById('bgOpacity').value = opacity;
   document.getElementById('bgOpacityVal').textContent = opacity + '%';
   document.getElementById('bgPreviewOverlay').style.setProperty('--ov', opacity / 100);
   const img = document.getElementById('bgPreviewImg');
+  const video = document.getElementById('bgPreviewVideo');
+  const yt = document.getElementById('bgPreviewYt');
+
+  img.style.display = 'none'; img.src = '';
+  video.style.display = 'none'; video.removeAttribute('src'); video.load();
+  yt.style.display = 'none'; yt.src = '';
+
   if (bg.url) {
-    img.src = bg.url;
-    img.style.display = 'block';
+    const kind = getBgKind(bg);
+    if (kind === 'youtube') {
+      const id = extractYouTubeId(bg.url);
+      if (id) {
+        yt.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0&playsinline=1`;
+        yt.style.display = 'block';
+      }
+    } else if (kind === 'video') {
+      video.src = bg.url;
+      video.style.display = 'block';
+    } else {
+      img.src = bg.url;
+      img.style.display = 'block';
+    }
     document.getElementById('bgPreviewNoImg').style.display = 'none';
     document.getElementById('bgPreviewContent').style.display = 'block';
   } else {
-    img.style.display = 'none';
-    img.src = '';
     document.getElementById('bgPreviewNoImg').style.display = 'flex';
     document.getElementById('bgPreviewContent').style.display = 'none';
   }
