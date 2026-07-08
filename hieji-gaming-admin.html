@@ -11,16 +11,24 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --c1: #7c3aed; --c2: #06b6d4;
-    --bg: #09090f; --surface: #111118;
-    --card: #17171f; --border: rgba(255,255,255,0.08);
-    --text: #f1f5f9; --muted: #64748b; --danger: #ef4444;
+    --bg: #0a0a10; --surface: #12121a; --surface-2: #15151e;
+    --card: #16161f; --card-hover: #1a1a25; --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14);
+    --text: #f1f5f9; --muted: #7c8598; --muted-2: #4b5468; --danger: #ef4444; --success: #22c55e;
+    --radius-sm: 8px; --radius: 12px; --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow: 0 4px 16px rgba(0,0,0,0.28);
+    --sidebar-w: 232px;
   }
-  body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
   /* LOGIN */
   #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; padding: 2rem; }
   .login-logo { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px; }
-  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; }
+  .login-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 100%; max-width: 340px; box-shadow: var(--shadow); }
   .login-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
   .form-group { margin-bottom: 1rem; }
   label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; letter-spacing: 1px; text-transform: uppercase; }
@@ -32,42 +40,53 @@
   input:focus, select:focus { border-color: var(--c1); }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-    padding: 0.6rem 1.2rem; border-radius: 8px; font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s;
+    padding: 0.6rem 1.2rem; border-radius: var(--radius-sm); font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s, background 0.2s, border-color 0.2s;
   }
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary { background: linear-gradient(135deg, var(--c1), #9333ea); color: #fff; width: 100%; }
-  .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-  .btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); }
-  .btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
+  .btn-primary { background: linear-gradient(135deg, var(--c1), #9333ea); color: #fff; width: 100%; box-shadow: 0 4px 14px rgba(124,58,237,0.3); }
+  .btn-primary:hover:not(:disabled) { opacity: 0.92; }
+  .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.09); border-color: var(--border-strong); }
+  .btn-danger { background: rgba(239,68,68,0.13); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
+  .btn-danger:hover { background: rgba(239,68,68,0.22); }
   .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
   .err-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none; }
 
   /* ADMIN SHELL */
   #adminShell { display: none; min-height: 100vh; flex-direction: column; }
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.9rem; padding: 0.7rem 1.5rem; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; }
   .topbar-logo { font-family: 'Orbitron', monospace; font-size: 0.9rem; font-weight: 900; background: linear-gradient(90deg, var(--c1), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
-  .topbar-badge { font-size: 0.7rem; background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); border-radius: 99px; padding: 2px 8px; font-weight: 600; letter-spacing: 1px; }
-  .topbar-user { font-size: 0.8rem; color: var(--muted); }
+  .topbar-badge { font-size: 0.68rem; background: rgba(124,58,237,0.16); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); border-radius: 99px; padding: 3px 9px; font-weight: 700; letter-spacing: 1.5px; }
+  .topbar-user { font-size: 0.8rem; color: var(--muted); padding-left: 0.6rem; border-left: 1px solid var(--border); }
   .topbar-actions { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  .save-status { font-size: 0.8rem; color: var(--muted); }
-  .save-status.saved { color: #22c55e; }
+  .save-status { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .save-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--muted-2); flex-shrink: 0; }
+  .save-status.saved { color: var(--success); }
+  .save-status.saved::before { background: var(--success); }
   .save-status.error { color: var(--danger); }
+  .save-status.error::before { background: var(--danger); }
 
-  /* TABS */
-  .tabs { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; overflow-x: auto; }
-  .tab { padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; white-space: nowrap; user-select: none; }
-  .tab.active { color: var(--c1); border-color: var(--c1); }
+  /* LAYOUT: SIDEBAR + CONTENT */
+  .admin-layout { display: flex; flex: 1; min-height: 0; align-items: flex-start; }
+
+  /* SIDEBAR NAV (desktop) */
+  .tabs { flex-shrink: 0; width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); padding: 1rem 0.75rem; position: sticky; top: 53px; align-self: flex-start; height: calc(100vh - 53px); overflow-y: auto; }
+  .tab { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem 0.75rem; font-size: 0.88rem; font-weight: 600; color: var(--muted); cursor: pointer; border-radius: var(--radius-sm); transition: color 0.15s, background 0.15s; white-space: nowrap; user-select: none; margin-bottom: 2px; border-left: 2px solid transparent; }
+  .tab:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .tab.active { color: #fff; background: linear-gradient(90deg, rgba(124,58,237,0.22), rgba(124,58,237,0.04)); border-left: 2px solid var(--c1); }
 
   /* CONTENT */
-  .content { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
+  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 4rem; max-width: 760px; margin: 0 auto; }
   .panel { display: none; }
-  .panel.active { display: block; }
-  .panel-title { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; }
+  .panel.active { display: block; animation: panelIn 0.25s ease; }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .panel-title { font-family: 'Orbitron', monospace; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+  .panel-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.4rem; line-height: 1.5; }
 
   /* CARD */
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.4rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
   .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .card-header h3 { font-size: 1rem; font-weight: 600; }
 
@@ -175,6 +194,23 @@
 
   /* HIDDEN FILE INPUT */
   input[type=file] { display: none; }
+
+  /* RESPONSIVE: sidebar → thanh tab ngang trên mobile/tablet nhỏ */
+  @media (max-width: 900px) {
+    .admin-layout { flex-direction: column; }
+    .tabs {
+      width: 100%; height: auto; position: sticky; top: 53px; z-index: 40;
+      display: flex; flex-direction: row; gap: 2px; overflow-x: auto; overflow-y: hidden;
+      padding: 0.6rem 1rem; border-right: none; border-bottom: 1px solid var(--border);
+    }
+    .tab { border-left: none; border-bottom: 2px solid transparent; border-radius: var(--radius-sm) var(--radius-sm) 0 0; margin-bottom: 0; }
+    .tab.active { background: rgba(124,58,237,0.14); border-bottom: 2px solid var(--c1); border-left: none; }
+    .content { padding: 1.25rem 1rem 3rem; max-width: 100%; }
+  }
+  @media (max-width: 560px) {
+    .topbar { padding: 0.65rem 1rem; }
+    .topbar-user { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -214,23 +250,24 @@
     <div class="topbar-actions">
       <span class="save-status" id="saveStatus">Chưa có thay đổi</span>
       <button class="btn btn-primary btn-sm" id="saveBtn" onclick="saveAll()">💾 Lưu tất cả</button>
-      <button class="btn btn-secondary btn-sm" onclick="window.open('https://hiejigaming.netlify.app/','_blank')">← Xem trang bio</button>
+      <button class="btn btn-secondary btn-sm" onclick="window.open('https://shim52547-create.github.io/hiejigaming/','_blank')">← Xem trang bio</button>
       <button class="btn btn-secondary btn-sm" onclick="doLogout()">Đăng xuất</button>
     </div>
   </div>
 
+  <div class="admin-layout">
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('profile',this)">👤 Profile</div>
-    <div class="tab" onclick="switchTab('bg',this)">🖼 Nền</div>
-    <div class="tab" onclick="switchTab('music',this)">🎵 Nhạc</div>
-    <div class="tab" onclick="switchTab('games',this)">🎮 Game</div>
-    <div class="tab" onclick="switchTab('apps',this)">📱 App</div>
-    <div class="tab" onclick="switchTab('social',this)">🔗 Mạng xã hội</div>
-    <div class="tab" onclick="switchTab('stats',this)">📊 Thống kê</div>
-    <div class="tab" onclick="switchTab('videos',this)">📹 Video HD</div>
-    <div class="tab" onclick="switchTab('effects',this)">✨ Hiệu ứng</div>
-    <div class="tab" onclick="switchTab('donate',this)">💰 Ủng hộ</div>
-    <div class="tab" onclick="switchTab('settings',this)">⚙️ Cài đặt</div>
+    <div class="tab active" onclick="switchTab('profile',this)"><span>👤</span> Profile</div>
+    <div class="tab" onclick="switchTab('bg',this)"><span>🖼</span> Nền</div>
+    <div class="tab" onclick="switchTab('music',this)"><span>🎵</span> Nhạc</div>
+    <div class="tab" onclick="switchTab('games',this)"><span>🎮</span> Game</div>
+    <div class="tab" onclick="switchTab('apps',this)"><span>📱</span> App</div>
+    <div class="tab" onclick="switchTab('social',this)"><span>🔗</span> Mạng xã hội</div>
+    <div class="tab" onclick="switchTab('stats',this)"><span>📊</span> Thống kê</div>
+    <div class="tab" onclick="switchTab('videos',this)"><span>📹</span> Video HD</div>
+    <div class="tab" onclick="switchTab('effects',this)"><span>✨</span> Hiệu ứng</div>
+    <div class="tab" onclick="switchTab('donate',this)"><span>💰</span> Ủng hộ</div>
+    <div class="tab" onclick="switchTab('settings',this)"><span>⚙️</span> Cài đặt</div>
   </div>
 
   <div class="content">
@@ -632,6 +669,7 @@
       </div>
     </div>
 
+  </div>
   </div>
 </div>
 
