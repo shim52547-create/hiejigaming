@@ -6,6 +6,7 @@
 <title>HieJi Music — Focus Zone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -14,6 +15,12 @@
   --border: rgba(124,58,237,0.3); --text: #f1f5f9; --muted: #94a3b8;
 }
 body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* BACKGROUND (ảnh/video nền đồng bộ từ trang bio) */
+#site-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed; overflow: hidden; }
+#site-bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+#site-bg-yt { position: absolute; top: 50%; left: 50%; width: 177.78vh; height: 56.25vw; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); border: 0; display: none; pointer-events: none; }
+#site-bg-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: rgba(7,7,15,0.5); }
 
 /* PARTICLES */
 #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -169,6 +176,11 @@ audio#mp3Player { display: none; }
 </style>
 </head>
 <body>
+<div id="site-bg">
+  <video id="site-bg-video" autoplay muted loop playsinline></video>
+  <iframe id="site-bg-yt" src="" allow="autoplay; encrypted-media" title="background video"></iframe>
+</div>
+<div id="site-bg-overlay"></div>
 <div id="particles"></div>
 <div class="bg-glow"></div>
 
@@ -963,6 +975,69 @@ renderQuote(false);
 restartQuoteAutoTimer();
 updateTimerDisplay();
 document.getElementById('timerCircle').style.strokeDasharray = (2 * Math.PI * 54).toFixed(1);
+</script>
+
+<!-- ══ NỀN ĐỒNG BỘ TỪ TRANG BIO (đọc key "bg" từ Supabase) ══ -->
+<script>
+(function() {
+  const SUPABASE_URL      = 'https://iivwsnbhkffxvmccktuj.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdndzbmJoa2ZmeHZtY2NrdHVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2OTY3NDEsImV4cCI6MjA5ODI3Mjc0MX0.EPfaIbHGMDiZJyK6XKtt-iKu6Ip22AY7hFpKom1PzuA';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function extractYouTubeId(url) {
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+  function getBgKind(bg) {
+    if (!bg || !bg.url) return 'none';
+    if (bg.type === 'youtube' || /youtube\.com|youtu\.be/i.test(bg.url)) return 'youtube';
+    if (bg.type === 'video') return 'video';
+    if (bg.type === 'image') return 'image';
+    return /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(bg.url) ? 'video' : 'image';
+  }
+  function applyBg(bg) {
+    const bgEl = document.getElementById('site-bg');
+    const videoEl = document.getElementById('site-bg-video');
+    const ytEl = document.getElementById('site-bg-yt');
+    const overlayEl = document.getElementById('site-bg-overlay');
+    if (!bgEl || !videoEl || !ytEl || !overlayEl) return;
+
+    bgEl.style.backgroundImage = 'none';
+    videoEl.pause();
+    videoEl.removeAttribute('src');
+    videoEl.load();
+    videoEl.style.display = 'none';
+    ytEl.style.display = 'none';
+    ytEl.src = '';
+
+    if (!bg || !bg.url) { overlayEl.style.background = 'transparent'; return; }
+
+    const opacity = (bg.opacity ?? 50) / 100;
+    overlayEl.style.background = `rgba(7,7,15,${opacity})`;
+
+    const kind = getBgKind(bg);
+    if (kind === 'youtube') {
+      const id = extractYouTubeId(bg.url);
+      if (id) {
+        ytEl.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0&playsinline=1`;
+        ytEl.style.display = 'block';
+      }
+    } else if (kind === 'video') {
+      videoEl.setAttribute('src', bg.url);
+      videoEl.style.display = 'block';
+      videoEl.play().catch(() => {});
+    } else {
+      bgEl.style.backgroundImage = `url('${bg.url}')`;
+    }
+  }
+
+  (async function() {
+    try {
+      const { data, error } = await sb.from('hieji_config').select('value').eq('key', 'bg').single();
+      if (!error && data && data.value) applyBg(data.value);
+    } catch (e) { console.warn('Không tải được nền:', e); }
+  })();
+})();
 </script>
 </body>
 </html>
