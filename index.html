@@ -254,7 +254,7 @@
   .enter-hint { position: relative; z-index: 1; font-size: 0.75rem; color: var(--muted); margin-top: 1rem; letter-spacing: 2px; }
 
   /* ADMIN FAB */
-  .admin-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: background 0.2s; text-decoration: none; }
+  .admin-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: background 0.2s; text-decoration: none; padding: 0; font-family: inherit; }
   .admin-fab:hover { background: rgba(255,255,255,0.12); }
   .admin-fab svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 1.5; }
   body[data-theme="light"] .admin-fab { background: rgba(28,23,48,0.06); border-color: rgba(28,23,48,0.1); }
@@ -322,6 +322,28 @@
   .btn-copy { flex-shrink: 0; padding: 0.4rem 0.75rem; border-radius: 8px; border: 1px solid rgba(124,58,237,0.4); background: rgba(124,58,237,0.15); color: #a78bfa; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
   .btn-copy:hover { background: rgba(124,58,237,0.3); }
   body[data-theme="light"] .donate-row { background: rgba(28,23,48,0.03); border-color: rgba(28,23,48,0.08); }
+
+  /* SETTINGS MODAL */
+  #settingsModal { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 500; display: none; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(8px); }
+  #settingsModal.open { display: flex; }
+  .settings-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .settings-hint { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.3rem; }
+  .settings-row { display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 0.7rem 0.9rem; }
+  body[data-theme="light"] .settings-row { background: rgba(28,23,48,0.03); border-color: rgba(28,23,48,0.08); }
+  .settings-row-info { flex: 1; min-width: 0; }
+  .settings-row-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .settings-row-sub { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+  .settings-row.disabled { opacity: 0.45; pointer-events: none; }
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track { position: absolute; inset: 0; background: rgba(255,255,255,0.14); border-radius: 99px; cursor: pointer; transition: background 0.2s; }
+  .switch-track::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+  .switch input:checked + .switch-track { background: linear-gradient(135deg, var(--c1), var(--c2)); }
+  .switch input:checked + .switch-track::before { transform: translateX(18px); }
+  .settings-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 0.4rem 0; }
+  body[data-theme="light"] .settings-divider { background: rgba(28,23,48,0.08); }
+  .settings-login-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.75rem; border-radius: 12px; border: 1px solid rgba(124,58,237,0.35); background: rgba(124,58,237,0.12); color: #a78bfa; font-family: 'Rajdhani', sans-serif; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .settings-login-btn:hover { background: rgba(124,58,237,0.22); }
 </style>
 </head>
 <body>
@@ -500,10 +522,50 @@
   </div>
 </div>
 
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" onclick="closeSettingsModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-icon" style="background:rgba(255,255,255,0.08)">⚙️</div>
+      <div class="modal-title">Cài đặt</div>
+      <button class="modal-close" onclick="closeSettingsModal()">&#x2715;</button>
+    </div>
+    <div class="settings-body">
+      <p class="settings-hint">Tuỳ chỉnh cá nhân — chỉ áp dụng trên trình duyệt này, không ảnh hưởng người xem khác.</p>
+
+      <div class="settings-row" id="settingsCursorRow">
+        <div class="settings-row-info">
+          <div class="settings-row-title">✨ Hiệu ứng con trỏ chuột</div>
+          <div class="settings-row-sub" id="settingsCursorSub">Đuôi hạt đi theo chuột</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingsCursorToggle" onchange="setUserPref('cursorfx', this.checked)">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+
+      <div class="settings-row" id="settingsSfxRow">
+        <div class="settings-row-info">
+          <div class="settings-row-title">🔊 Âm thanh tương tác</div>
+          <div class="settings-row-sub" id="settingsSfxSub">Tiếng bíp nhẹ khi hover / click</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingsSfxToggle" onchange="setUserPref('cursorsfx', this.checked)">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+
+      <div class="settings-divider"></div>
+
+      <a href="hieji-gaming-admin.html" target="_blank" rel="noopener" class="settings-login-btn">🔑 Đăng nhập trang quản trị</a>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN FAB -->
-<a href="hieji-gaming-admin.html" class="admin-fab" title="Trang quản trị">
+<button class="admin-fab" title="Cài đặt" onclick="openSettingsModal()">
   <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-</a>
+</button>
 
 <script>
 // ══════════════════════════════════════════════
@@ -705,7 +767,7 @@ function renderAll(data) {
   renderLinks('socialWrap', data.social);
   renderVideos(data.videos);
   renderDonate(data.donate);
-  applyCursorFx(data.cursor);
+  applyCursorFx(getEffectiveCursorCfg());
 
   const m = data.music || {};
   document.getElementById('musicTitle').textContent  = m.title  || 'Chưa có nhạc';
@@ -905,8 +967,72 @@ function copyDonateText(btn, text) {
   });
 }
 
+// ── SETTINGS (tuỳ chỉnh cá nhân, lưu trên trình duyệt) ──
+const PREF_KEY = 'hj_user_prefs';
+function loadUserPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch (e) { return {}; }
+}
+function saveUserPrefs(p) {
+  try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {}
+}
+function getEffectiveCursorCfg() {
+  const base = (siteData && siteData.cursor) || DEFAULT_DATA.cursor;
+  const prefs = loadUserPrefs();
+  const cfg = { ...base };
+  if (base.enabled) {
+    if (prefs.cursorfx === false) cfg.enabled = false;
+    if (base.sfx && prefs.cursorsfx === false) cfg.sfx = false;
+  }
+  return cfg;
+}
+function setUserPref(key, checked) {
+  const prefs = loadUserPrefs();
+  prefs[key] = checked;
+  saveUserPrefs(prefs);
+  applyCursorFx(getEffectiveCursorCfg());
+}
+function openSettingsModal() {
+  const base = (siteData && siteData.cursor) || DEFAULT_DATA.cursor;
+  const prefs = loadUserPrefs();
+  const cursorRow = document.getElementById('settingsCursorRow');
+  const sfxRow = document.getElementById('settingsSfxRow');
+  const cursorToggle = document.getElementById('settingsCursorToggle');
+  const sfxToggle = document.getElementById('settingsSfxToggle');
+
+  if (base.enabled) {
+    cursorRow.classList.remove('disabled');
+    document.getElementById('settingsCursorSub').textContent = 'Đuôi hạt đi theo chuột';
+    cursorToggle.checked = prefs.cursorfx !== false;
+  } else {
+    cursorRow.classList.add('disabled');
+    document.getElementById('settingsCursorSub').textContent = 'Đang tắt bởi quản trị viên';
+    cursorToggle.checked = false;
+  }
+
+  if (base.enabled && base.sfx) {
+    sfxRow.classList.remove('disabled');
+    document.getElementById('settingsSfxSub').textContent = 'Tiếng bíp nhẹ khi hover / click';
+    sfxToggle.checked = prefs.cursorsfx !== false;
+  } else {
+    sfxRow.classList.add('disabled');
+    document.getElementById('settingsSfxSub').textContent = base.enabled ? 'Quản trị viên đã tắt âm thanh' : 'Cần bật hiệu ứng con trỏ trước';
+    sfxToggle.checked = false;
+  }
+
+  document.getElementById('settingsModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSettingsModal(e) {
+  if (e && e.target !== document.getElementById('settingsModal') && !e.target.closest('.modal-close')) return;
+  document.getElementById('settingsModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeDonateModal({ target: document.getElementById('donateModal') });
+  if (e.key === 'Escape') {
+    closeDonateModal({ target: document.getElementById('donateModal') });
+    closeSettingsModal({ target: document.getElementById('settingsModal') });
+  }
 });
 
 // ── CURSOR FX ──
