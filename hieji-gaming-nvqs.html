@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HieJi — Nghĩa Vụ Quân Sự 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --c1: #5a7d3a; --c2: #d4af37; --c3: #8fae5a;
+  --bg: #0a0d07; --card: rgba(255,255,255,0.045);
+  --border: rgba(90,125,58,0.4); --text: #f1f0e8; --muted: #9a9f8c;
+}
+body { font-family: 'Rajdhani', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* NỀN RIÊNG CỦA TRANG NÀY — độc lập hoàn toàn với các trang khác, lưu cục bộ trên máy */
+#site-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-size: cover; background-position: center center; background-repeat: no-repeat; background-attachment: fixed; overflow: hidden; }
+#site-bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#site-bg-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: rgba(8,10,5,0.55); }
+
+#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: var(--c2); animation: float linear infinite; opacity: 0; }
+@keyframes float { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.25; } 100% { transform: translateY(-20px); opacity: 0; } }
+.bg-glow { position: fixed; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(90,125,58,0.14) 0%, transparent 70%); top: -200px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 0; }
+
+#app { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 1.5rem 1.2rem 4rem; }
+
+.back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); text-decoration: none; letter-spacing: 1px; margin-bottom: 1.5rem; transition: color 0.2s; }
+.back-btn:hover { color: var(--c2); }
+.back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.page-header { text-align: center; margin-bottom: 1.6rem; }
+.page-badge { display: inline-block; font-size: 1.8rem; margin-bottom: 0.3rem; }
+.page-title { font-family: 'Orbitron', monospace; font-size: 1.35rem; font-weight: 900; background: linear-gradient(90deg, var(--c3), var(--c2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; }
+.page-sub { font-size: 0.82rem; color: var(--muted); margin-top: 0.4rem; letter-spacing: 1.5px; }
+
+.section-label { font-size: 0.68rem; letter-spacing: 4px; text-transform: uppercase; color: var(--c3); font-weight: 700; margin-bottom: 0.8rem; margin-top: 2rem; display: flex; align-items: center; gap: 8px; }
+.section-label:first-of-type { margin-top: 0; }
+
+/* ══ NỀN RIÊNG - PANEL CÀI ĐẶT ══ */
+.bg-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1rem 1.1rem; }
+.bg-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.bg-toggle-title { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.bg-toggle svg { width: 16px; height: 16px; stroke: var(--muted); fill: none; stroke-width: 2; transition: transform 0.25s; }
+.bg-toggle.open svg { transform: rotate(180deg); }
+.bg-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.bg-body.open { max-height: 500px; margin-top: 0.9rem; }
+.bg-row { display: flex; gap: 0.6rem; margin-bottom: 0.6rem; }
+.bg-input { flex: 1; background: rgba(0,0,0,0.28); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 0.8rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; outline: none; }
+.bg-input:focus { border-color: var(--c2); }
+.bg-actions { display: flex; gap: 0.6rem; margin-top: 0.4rem; }
+.bg-btn { flex: 1; border: none; border-radius: 10px; padding: 0.6rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.5px; cursor: pointer; }
+.bg-btn.apply { background: linear-gradient(135deg, var(--c1), var(--c3)); color: #0a0d07; }
+.bg-btn.clear { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+.bg-hint { font-size: 0.7rem; color: var(--muted); line-height: 1.5; margin-top: 0.6rem; }
+
+/* ══ QUIZ CARD (10 lời thề / 12 điều kỷ luật) ══ */
+.quiz-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 1.2rem; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
+.quiz-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px); pointer-events: none; }
+.quiz-head { position: relative; margin-bottom: 1rem; }
+.quiz-title { font-size: 1.02rem; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 0.3rem; }
+.quiz-preface { font-size: 0.78rem; color: var(--muted); line-height: 1.5; font-style: italic; }
+
+.mode-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; background: rgba(0,0,0,0.25); border-radius: 12px; padding: 4px; margin-bottom: 1.1rem; position: relative; }
+.mode-tab { border: none; background: transparent; color: var(--muted); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.3px; padding: 0.55rem 0.3rem; border-radius: 9px; cursor: pointer; transition: background 0.2s, color 0.2s; text-align: center; line-height: 1.3; }
+.mode-tab.active { background: linear-gradient(135deg, var(--c1), var(--c3)); color: #0a0d07; }
+
+.oath-list { display: flex; flex-direction: column; gap: 0.6rem; position: relative; }
+
+/* Mode A - đọc bình thường */
+.oath-item { background: rgba(0,0,0,0.18); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem 0.95rem; }
+.oath-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--c1), var(--c3)); color: #0a0d07; font-family: 'Orbitron', monospace; font-size: 0.68rem; font-weight: 900; flex-shrink: 0; margin-right: 8px; }
+.oath-text { font-size: 0.88rem; line-height: 1.6; display: inline; }
+.oath-oath-tag { display: inline-block; margin-top: 0.4rem; font-size: 0.7rem; color: var(--c2); font-weight: 700; letter-spacing: 1px; }
+
+/* Mode B - ẩn / bấm để hiện */
+.reveal-item { background: rgba(0,0,0,0.18); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; }
+.reveal-head { display: flex; align-items: center; padding: 0.8rem 0.95rem; gap: 8px; }
+.reveal-head span.lbl { flex: 1; font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+.reveal-chev { width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 2; transition: transform 0.25s; flex-shrink: 0; }
+.reveal-item.open .reveal-chev { transform: rotate(180deg); }
+.reveal-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 0.95rem; }
+.reveal-item.open .reveal-body { max-height: 400px; padding: 0 0.95rem 0.9rem; }
+.reveal-body-inner { font-size: 0.86rem; line-height: 1.6; }
+.reveal-toolbar { display: flex; gap: 0.6rem; margin-bottom: 0.7rem; }
+.reveal-toolbar button { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted); border-radius: 9px; padding: 0.5rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.75rem; cursor: pointer; }
+.reveal-toolbar button:hover { color: var(--c2); border-color: var(--c2); }
+
+/* Mode C - gõ đúng mới mở tiếp */
+.quiz-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 0.9rem; }
+.quiz-progress-bar { flex: 1; height: 6px; border-radius: 99px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.quiz-progress-fill { height: 100%; background: linear-gradient(90deg, var(--c1), var(--c2)); border-radius: 99px; transition: width 0.35s ease; }
+.quiz-progress-txt { font-size: 0.7rem; color: var(--muted); font-weight: 700; white-space: nowrap; }
+
+.locked-item { background: rgba(0,0,0,0.14); border: 1px dashed var(--border); border-radius: 12px; padding: 0.7rem 0.95rem; font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 8px; opacity: 0.55; }
+.done-item { background: rgba(90,125,58,0.1); border: 1px solid rgba(90,125,58,0.45); border-radius: 12px; padding: 0.85rem 0.95rem; }
+.done-item .oath-text { font-size: 0.86rem; line-height: 1.6; }
+.done-tag { font-size: 0.68rem; color: var(--c3); font-weight: 700; letter-spacing: 1px; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 5px; }
+
+.active-item { background: rgba(0,0,0,0.22); border: 1px solid var(--c2); border-radius: 14px; padding: 1rem; }
+.active-item-label { font-size: 0.72rem; color: var(--c2); font-weight: 700; letter-spacing: 1.5px; margin-bottom: 0.6rem; }
+.quiz-textarea { width: 100%; min-height: 90px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 0.85rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.88rem; line-height: 1.5; outline: none; resize: vertical; }
+.quiz-textarea:focus { border-color: var(--c2); }
+.quiz-btn-row { display: flex; gap: 0.6rem; margin-top: 0.7rem; }
+.quiz-btn { border: none; border-radius: 10px; padding: 0.6rem 0.9rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.quiz-btn.primary { flex: 1; background: linear-gradient(135deg, var(--c1), var(--c3)); color: #0a0d07; }
+.quiz-btn.ghost { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+.quiz-feedback { margin-top: 0.6rem; font-size: 0.78rem; font-weight: 700; display: none; padding: 0.5rem 0.7rem; border-radius: 9px; }
+.quiz-feedback.ok { display: block; background: rgba(90,125,58,0.18); color: var(--c3); }
+.quiz-feedback.bad { display: block; background: rgba(220,80,80,0.12); color: #f2a3a3; }
+.quiz-complete { text-align: center; padding: 1.4rem 1rem; }
+.quiz-complete .ic { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.quiz-complete .msg { font-size: 0.9rem; font-weight: 700; color: var(--c3); margin-bottom: 0.8rem; }
+
+/* ══ VIDEO PLAYLIST ══ */
+.video-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 1.2rem; }
+.video-frame-wrap { width: 100%; aspect-ratio: 16/9; background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 0.9rem; display: flex; align-items: center; justify-content: center; }
+.video-frame-wrap iframe, .video-frame-wrap video { width: 100%; height: 100%; border: 0; display: block; }
+.video-empty { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1rem; line-height: 1.6; }
+.video-controls { display: flex; gap: 0.6rem; margin-bottom: 0.9rem; }
+.video-controls button { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 0.6rem; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.video-controls button:hover { border-color: var(--c2); color: var(--c2); }
+.video-controls button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+.video-add-row { display: flex; flex-direction: column; gap: 0.6rem; }
+.video-textarea { width: 100%; min-height: 68px; background: rgba(0,0,0,0.28); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 0.8rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.82rem; outline: none; resize: vertical; }
+.video-textarea:focus { border-color: var(--c2); }
+.video-add-btn { background: linear-gradient(135deg, var(--c1), var(--c3)); border: none; border-radius: 10px; padding: 0.65rem; color: #0a0d07; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+.video-hint { font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.5; }
+.playlist-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.9rem; max-height: 220px; overflow-y: auto; }
+.playlist-row { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.16); border: 1px solid var(--border); border-radius: 9px; padding: 0.5rem 0.7rem; font-size: 0.76rem; }
+.playlist-row.current { border-color: var(--c2); background: rgba(212,175,55,0.1); }
+.playlist-idx { font-family: 'Orbitron', monospace; font-size: 0.68rem; color: var(--muted); flex-shrink: 0; width: 18px; }
+.playlist-url { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.playlist-row.current .playlist-url { color: var(--text); }
+.playlist-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 0 4px; flex-shrink: 0; }
+.playlist-del:hover { color: #f2a3a3; }
+
+/* ══ NOTE ══ */
+.note-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 1.2rem; }
+.note-textarea { width: 100%; min-height: 160px; background: rgba(0,0,0,0.28); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; line-height: 1.6; outline: none; resize: vertical; }
+.note-textarea:focus { border-color: var(--c2); }
+.note-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.7rem; }
+.note-status { font-size: 0.72rem; color: var(--muted); }
+.note-save-btn { background: linear-gradient(135deg, var(--c1), var(--c3)); border: none; border-radius: 10px; padding: 0.55rem 1.1rem; color: #0a0d07; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+
+.footer-note { text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.18); margin-top: 2.2rem; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div id="site-bg"><video id="site-bg-video" autoplay muted loop playsinline style="display:none"></video></div>
+<div id="site-bg-overlay"></div>
+<div class="bg-glow"></div>
+<div id="particles"></div>
+
+<div id="app">
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Về trang chủ
+  </a>
+
+  <div class="page-header">
+    <div class="page-badge">🎖️</div>
+    <div class="page-title">NGHĨA VỤ QUÂN SỰ 2026</div>
+    <div class="page-sub">Ôn luyện điều lệnh · Playlist video · Ghi chú chuẩn bị lên đường</div>
+  </div>
+
+  <!-- NỀN RIÊNG -->
+  <div class="section-label">🖼️ Nền riêng trang này</div>
+  <div class="bg-card">
+    <div class="bg-toggle" id="bgToggle">
+      <div class="bg-toggle-title">⚙️ Đổi ảnh / video nền</div>
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="bg-body" id="bgBody">
+      <div class="bg-row"><input type="text" id="bgImageInput" class="bg-input" placeholder="Dán link ẢNH nền (jpg, png...)"></div>
+      <div class="bg-row"><input type="text" id="bgVideoInput" class="bg-input" placeholder="Dán link VIDEO nền (.mp4, .webm...)"></div>
+      <div class="bg-actions">
+        <button class="bg-btn apply" onclick="applyCustomBg()">Áp dụng nền</button>
+        <button class="bg-btn clear" onclick="clearCustomBg()">Xoá nền</button>
+      </div>
+      <div class="bg-hint">Nền của trang này tách biệt hoàn toàn với các trang khác trong HieJi Gaming — chỉ lưu trên máy của bạn, không ảnh hưởng và không bị ảnh hưởng bởi nền của trang chủ.</div>
+    </div>
+  </div>
+
+  <!-- 10 LỜI THỀ -->
+  <div class="section-label">🏵️ 10 lời thề Quân đội nhân dân Việt Nam</div>
+  <div id="oathCard" class="quiz-card"></div>
+
+  <!-- 12 ĐIỀU KỶ LUẬT -->
+  <div class="section-label" style="margin-top:2rem">📜 12 điều kỷ luật Quân đội nhân dân Việt Nam</div>
+  <div id="disciplineCard" class="quiz-card"></div>
+
+  <!-- VIDEO PLAYLIST -->
+  <div class="section-label">🎬 Khung xem video</div>
+  <div class="video-card">
+    <div class="video-frame-wrap" id="videoFrameWrap">
+      <div class="video-empty">Chưa có video nào.<br>Dán link video bên dưới để bắt đầu xem.</div>
+    </div>
+    <div class="video-controls">
+      <button onclick="videoPrev()"><svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>Trước</button>
+      <button onclick="videoTogglePlay()" id="videoPlayBtn">▶ Phát</button>
+      <button onclick="videoNext()">Sau<svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+    </div>
+    <div class="video-add-row">
+      <textarea id="videoLinksInput" class="video-textarea" placeholder="Dán link video vào đây (mỗi link 1 dòng) — YouTube hoặc link video trực tiếp (.mp4)..."></textarea>
+      <button class="video-add-btn" onclick="addVideoLinks()">+ Thêm vào danh sách phát</button>
+    </div>
+    <div class="video-hint">Không giới hạn số lượng link. Hết video này sẽ tự chuyển sang video tiếp theo đúng theo thứ tự đã thêm.</div>
+    <div class="playlist-list" id="playlistList"></div>
+  </div>
+
+  <!-- NOTE -->
+  <div class="section-label">📝 Ghi chú cần lưu ý / đồ cần mang</div>
+  <div class="note-card">
+    <textarea id="noteArea" class="note-textarea" placeholder="Ví dụ: CMND/CCCD, giấy khám sức khoẻ, quần áo cá nhân, đồ dùng vệ sinh, thuốc cần thiết, số điện thoại gia đình..."></textarea>
+    <div class="note-footer">
+      <span class="note-status" id="noteStatus">Chưa có ghi chú</span>
+      <button class="note-save-btn" onclick="saveNote(true)">💾 Lưu ghi chú</button>
+    </div>
+  </div>
+
+  <div class="footer-note">HieJi Gaming © 2026 · Nghĩa vụ quân sự</div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+// ══════════════════════ PARTICLES ══════════════════════
+(function() {
+  const container = document.getElementById('particles');
+  const colors = ['#5a7d3a','#d4af37','#8fae5a'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+})();
+
+// ══════════════════════ NỀN RIÊNG (localStorage, độc lập trang khác) ══════════════════════
+const BG_KEY = 'nvqs_custom_bg';
+document.getElementById('bgToggle').addEventListener('click', () => {
+  document.getElementById('bgToggle').classList.toggle('open');
+  document.getElementById('bgBody').classList.toggle('open');
+});
+function applyBgFromData(data) {
+  const bgEl = document.getElementById('site-bg');
+  const videoEl = document.getElementById('site-bg-video');
+  if (!data) {
+    bgEl.style.backgroundImage = 'none';
+    videoEl.style.display = 'none';
+    videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load();
+    return;
+  }
+  if (data.type === 'video') {
+    bgEl.style.backgroundImage = 'none';
+    videoEl.setAttribute('src', data.url);
+    videoEl.style.display = 'block';
+    videoEl.play().catch(()=>{});
+  } else {
+    videoEl.style.display = 'none';
+    videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load();
+    bgEl.style.backgroundImage = `url('${data.url}')`;
+  }
+}
+function applyCustomBg() {
+  const img = document.getElementById('bgImageInput').value.trim();
+  const vid = document.getElementById('bgVideoInput').value.trim();
+  let data = null;
+  if (vid) data = { type: 'video', url: vid };
+  else if (img) data = { type: 'image', url: img };
+  if (!data) return;
+  localStorage.setItem(BG_KEY, JSON.stringify(data));
+  applyBgFromData(data);
+}
+function clearCustomBg() {
+  localStorage.removeItem(BG_KEY);
+  document.getElementById('bgImageInput').value = '';
+  document.getElementById('bgVideoInput').value = '';
+  applyBgFromData(null);
+}
+(function initBg() {
+  try {
+    const raw = localStorage.getItem(BG_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      applyBgFromData(data);
+      if (data.type === 'image') document.getElementById('bgImageInput').value = data.url;
+      if (data.type === 'video') document.getElementById('bgVideoInput').value = data.url;
+    }
+  } catch (e) {}
+})();
+
+// ══════════════════════ DỮ LIỆU: 10 LỜI THỀ & 12 ĐIỀU KỶ LUẬT ══════════════════════
+const OATH_PREFACE = 'Chúng tôi, Quân nhân trong Quân đội nhân dân Việt Nam, lấy danh dự người chiến sĩ cách mạng, xin thề dưới lá cờ vinh quang của Tổ quốc:';
+const OATHS = [
+  'Hy sinh tất cả vì tổ quốc Việt Nam; dưới sự lãnh đạo của Đảng Cộng sản Việt Nam, phấn đấu thực hiện một nước Việt Nam hòa bình, độc lập và xã hội chủ nghĩa, góp phần tích cực vào cuộc đấu tranh của nhân dân thế giới vì hòa bình, độc lập dân tộc, dân chủ và chủ nghĩa xã hội.',
+  'Tuyệt đối phục tùng mệnh lệnh cấp trên; khi nhận bất cứ nhiệm vụ gì đều tận tâm, tận lực thi hành nhanh chóng và chính xác.',
+  'Không ngừng nâng cao tinh thần yêu nước xã hội chủ nghĩa, tinh thần quốc tế vô sản, rèn luyện ý chí chiến đấu kiên quyết và bền bỉ, thắng không kiêu, bại không nản, dù gian lao khổ hạnh cũng không sờn lòng, vào sống ra chết cũng không nản chí. Nhiệm vụ nào cũng hoàn thành, khó khăn nào cũng vượt qua, kẻ thù nào cũng đánh thắng.',
+  'Ra sức học tập nâng cao trình độ chính trị, quân sự, văn hóa, khoa học kỹ thuật, nghiệp vụ, triệt để chấp hành điều lệnh, điều lệ, rèn luyện tính tổ chức, tính kỷ luật và tác phong chính quy, xây dựng quân đội ngày càng hùng mạnh, luôn luôn sẵn sàng chiến đấu.',
+  'Nêu cao tinh thần làm chủ tập thể xã hội chủ nghĩa, làm tròn nhiệm vụ chiến đấu bảo vệ tổ quốc, xây dựng chủ nghĩa xã hội và làm tròn nghĩa vụ quốc tế. Gương mẫu chấp hành và vận động nhân dân thực hiện mọi đường lối, chủ trương của Đảng, chính sách và luật pháp của Nhà nước.',
+  'Luôn luôn cảnh giác, tuyệt đối giữ bí mật quân sự và bí mật quốc gia. Nếu bị quân địch bắt, dù phải chịu cực hình tàn khốc thế nào cũng cương quyết một lòng trung thành với sự nghiệp cách mạng, không bao giờ phản bội xưng khai.',
+  'Đoàn kết chặt chẽ với nhau như ruột thịt trên tình thương yêu giai cấp; hết lòng giúp đỡ nhau lúc thường cũng như lúc ra trận; thực hiện toàn quân một ý chí.',
+  'Ra sức giữ gìn vũ khí trang bị, quyết không để hư hỏng hoặc rơi vào tay quân thù. Luôn nêu cao tinh thần bảo vệ của công, không tham ô, lãng phí.',
+  'Khi tiếp xúc với nhân dân làm đúng ba điều nên: kính trọng dân, giúp đỡ dân, bảo vệ dân; và ba điều răn: không lấy của dân, không dọa nạt dân, không quấy nhiễu dân. Để gây lòng tin cậy, yêu mến của nhân dân, thực hiện quân với dân một ý chí.',
+  'Giữ vững phẩm chất tốt đẹp và truyền thống quyết chiến, quyết thắng của quân đội nhân dân, luôn tự phê bình và phê bình, không làm điều gì hại tới danh dự của quân đội và quốc thể nước Cộng hòa Xã hội chủ nghĩa Việt Nam.'
+];
+const DISCIPLINES = [
+  'Không lấy cái kim, sợi chỉ của nhân dân.',
+  'Mua bán phải công bằng, sòng phẳng.',
+  'Mượn cái gì của nhân dân phải hỏi, dùng xong phải trả, làm hỏng, làm mất phải đền.',
+  'Đóng quân nhà dân không được gây phiền nhiễu cho nhân dân, phải gìn giữ nhà cửa sạch sẽ.',
+  'Phải nghiêm chỉnh chấp hành chính sách dân tộc, tôn trọng tự do, tín ngưỡng, phong tục tập quán của nhân dân.',
+  'Phải đoàn kết chặt chẽ với nhân dân, kính già, yêu trẻ, đứng đắn với phụ nữ.',
+  'Không được dọa nạt, đánh mắng nhân dân.',
+  'Phải bảo vệ tính mạng, tài sản của tập thể và nhà nước.',
+  'Phải đoàn kết, tôn trọng và ủng hộ các cơ quan dân, chính, Đảng, các lực lượng vũ trang địa phương.',
+  'Phải gương mẫu chấp hành mọi đường lối, chính sách của Đảng và pháp luật của nhà nước.',
+  'Phải tích cực tuyên truyền, vận động và giúp đỡ nhân dân thực hiện mọi đường lối, chính sách của Đảng và pháp luật của nhà nước.',
+  'Phải giữ bí mật và vận động nhân dân giữ bí mật của nhà nước và quân đội.'
+];
+
+// ══════════════════════ TIỆN ÍCH SO KHỚP VĂN BẢN (chế độ gõ đúng) ══════════════════════
+function normalizeText(s) {
+  return s.toLowerCase().replace(/[.,;:"'!?()\-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = new Array(n + 1);
+  let cur = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
+}
+function similarity(input, target) {
+  const a = normalizeText(input), b = normalizeText(target);
+  if (!a) return 0;
+  const dist = levenshtein(a, b);
+  const maxLen = Math.max(a.length, b.length);
+  return maxLen === 0 ? 1 : 1 - dist / maxLen;
+}
+
+// ══════════════════════ COMPONENT: QUIZ CARD (dùng chung cho 2 bảng) ══════════════════════
+function createQuizCard(mountId, storageKey, title, icon, items, preface) {
+  const mount = document.getElementById(mountId);
+  const MODE_KEY = storageKey + '_mode';
+  const PROGRESS_KEY = storageKey + '_progress';
+
+  let mode = localStorage.getItem(MODE_KEY) || 'normal'; // normal | reveal | quiz
+  let progress = 0;
+  try { progress = parseInt(localStorage.getItem(PROGRESS_KEY) || '0', 10) || 0; } catch(e) {}
+  if (progress > items.length) progress = items.length;
+
+  function saveMode() { localStorage.setItem(MODE_KEY, mode); }
+  function saveProgress() { localStorage.setItem(PROGRESS_KEY, String(progress)); }
+
+  function render() {
+    let html = `
+      <div class="quiz-head">
+        <div class="quiz-title">${icon} ${title}</div>
+        ${preface ? `<div class="quiz-preface">${preface}</div>` : ''}
+      </div>
+      <div class="mode-tabs">
+        <button class="mode-tab ${mode==='normal'?'active':''}" data-mode="normal">Đọc<br>bình thường</button>
+        <button class="mode-tab ${mode==='reveal'?'active':''}" data-mode="reveal">Ẩn — bấm<br>để hiện</button>
+        <button class="mode-tab ${mode==='quiz'?'active':''}" data-mode="quiz">Gõ đúng<br>mới mở tiếp</button>
+      </div>
+      <div class="oath-list" id="${mountId}_list"></div>
+    `;
+    mount.innerHTML = html;
+    mount.querySelectorAll('.mode-tab').forEach(btn => {
+      btn.addEventListener('click', () => { mode = btn.dataset.mode; saveMode(); render(); });
+    });
+    const listEl = document.getElementById(mountId + '_list');
+    if (mode === 'normal') renderNormal(listEl);
+    else if (mode === 'reveal') renderReveal(listEl);
+    else renderQuiz(listEl);
+  }
+
+  function renderNormal(listEl) {
+    listEl.innerHTML = items.map((txt, i) => `
+      <div class="oath-item">
+        <span class="oath-num">${i+1}</span><span class="oath-text">${txt}</span>
+        <div class="oath-oath-tag">— Xin thề!</div>
+      </div>
+    `).join('');
+  }
+
+  function renderReveal(listEl) {
+    listEl.innerHTML = `
+      <div class="reveal-toolbar">
+        <button data-act="openall">👁️ Hiện tất cả</button>
+        <button data-act="closeall">🙈 Ẩn tất cả</button>
+      </div>
+    ` + items.map((txt, i) => `
+      <div class="reveal-item" data-idx="${i}">
+        <div class="reveal-head">
+          <span class="oath-num">${i+1}</span>
+          <span class="lbl">Bấm để xem điều số ${i+1}</span>
+          <svg class="reveal-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="reveal-body"><div class="reveal-body-inner">${txt}</div></div>
+      </div>
+    `).join('');
+    listEl.querySelectorAll('.reveal-item').forEach(el => {
+      el.querySelector('.reveal-head').addEventListener('click', () => el.classList.toggle('open'));
+    });
+    listEl.querySelector('[data-act="openall"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      listEl.querySelectorAll('.reveal-item').forEach(el => el.classList.add('open'));
+    });
+    listEl.querySelector('[data-act="closeall"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      listEl.querySelectorAll('.reveal-item').forEach(el => el.classList.remove('open'));
+    });
+  }
+
+  function renderQuiz(listEl) {
+    let html = `<div class="quiz-progress">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${(progress/items.length*100).toFixed(0)}%"></div></div>
+      <div class="quiz-progress-txt">${progress}/${items.length}</div>
+    </div>`;
+
+    for (let i = 0; i < progress; i++) {
+      html += `<div class="done-item"><div class="done-tag">✅ Đã thuộc — điều ${i+1}</div><div class="oath-text">${items[i]}</div></div>`;
+    }
+
+    if (progress < items.length) {
+      html += `
+        <div class="active-item">
+          <div class="active-item-label">✍️ GÕ LẠI ĐIỀU SỐ ${progress+1} THEO TRÍ NHỚ</div>
+          <textarea class="quiz-textarea" id="${mountId}_input" placeholder="Nhập nội dung điều số ${progress+1}..."></textarea>
+          <div class="quiz-btn-row">
+            <button class="quiz-btn primary" data-act="check">Kiểm tra</button>
+            <button class="quiz-btn ghost" data-act="reveal">Xem đáp án</button>
+          </div>
+          <div class="quiz-feedback" id="${mountId}_feedback"></div>
+        </div>
+      `;
+      for (let i = progress + 1; i < items.length; i++) {
+        html += `<div class="locked-item">🔒 Điều ${i+1} — hoàn thành điều trước để mở khoá</div>`;
+      }
+    } else {
+      html += `<div class="quiz-complete"><div class="ic">🏅</div><div class="msg">Bạn đã thuộc đầy đủ ${items.length} nội dung!</div><button class="quiz-btn ghost" data-act="reset">↺ Học lại từ đầu</button></div>`;
+    }
+
+    listEl.innerHTML = html;
+
+    const checkBtn = listEl.querySelector('[data-act="check"]');
+    const revealBtn = listEl.querySelector('[data-act="reveal"]');
+    const resetBtn = listEl.querySelector('[data-act="reset"]');
+    if (checkBtn) checkBtn.addEventListener('click', () => {
+      const input = document.getElementById(mountId + '_input');
+      const fb = document.getElementById(mountId + '_feedback');
+      const score = similarity(input.value, items[progress]);
+      if (score >= 0.8) {
+        progress++;
+        saveProgress();
+        renderQuiz(listEl);
+      } else {
+        fb.className = 'quiz-feedback bad';
+        fb.textContent = `Chưa đúng (khớp ${(score*100).toFixed(0)}%) — thử lại hoặc bấm "Xem đáp án".`;
+      }
+    });
+    if (revealBtn) revealBtn.addEventListener('click', () => {
+      const fb = document.getElementById(mountId + '_feedback');
+      fb.className = 'quiz-feedback ok';
+      fb.textContent = 'Đáp án: ' + items[progress];
+    });
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+      progress = 0;
+      saveProgress();
+      renderQuiz(listEl);
+    });
+  }
+
+  render();
+}
+
+createQuizCard('oathCard', 'nvqs_oath', '10 Lời Thề', '🏵️', OATHS, OATH_PREFACE);
+createQuizCard('disciplineCard', 'nvqs_discipline', '12 Điều Kỷ Luật', '📜', DISCIPLINES, '');
+
+// ══════════════════════ VIDEO PLAYLIST (link vô hạn, tự chuyển video tiếp theo) ══════════════════════
+const PLAYLIST_KEY = 'nvqs_video_playlist';
+let playlist = [];
+try { playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]'); } catch(e) { playlist = []; }
+let currentIdx = 0;
+let ytPlayer = null;
+let ytApiReady = false;
+
+function savePlaylist() { localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist)); }
+
+function extractYouTubeId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function addVideoLinks() {
+  const raw = document.getElementById('videoLinksInput').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (!lines.length) return;
+  const wasEmpty = playlist.length === 0;
+  playlist = playlist.concat(lines);
+  savePlaylist();
+  document.getElementById('videoLinksInput').value = '';
+  renderPlaylist();
+  if (wasEmpty) loadVideo(0, true);
+}
+
+function renderPlaylist() {
+  const el = document.getElementById('playlistList');
+  if (!playlist.length) { el.innerHTML = ''; return; }
+  el.innerHTML = playlist.map((url, i) => `
+    <div class="playlist-row ${i===currentIdx?'current':''}">
+      <span class="playlist-idx">${i+1}</span>
+      <span class="playlist-url">${url}</span>
+      <button class="playlist-del" data-i="${i}">✕</button>
+    </div>
+  `).join('');
+  el.querySelectorAll('.playlist-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.i, 10);
+      playlist.splice(i, 1);
+      savePlaylist();
+      if (playlist.length === 0) {
+        currentIdx = 0;
+        document.getElementById('videoFrameWrap').innerHTML = '<div class="video-empty">Chưa có video nào.<br>Dán link video bên dưới để bắt đầu xem.</div>';
+      } else if (i < currentIdx || currentIdx >= playlist.length) {
+        currentIdx = Math.max(0, Math.min(currentIdx, playlist.length - 1));
+        loadVideo(currentIdx, false);
+      }
+      renderPlaylist();
+    });
+  });
+}
+
+function loadVideo(idx, autoplay) {
+  if (!playlist.length) return;
+  currentIdx = ((idx % playlist.length) + playlist.length) % playlist.length;
+  const url = playlist[currentIdx];
+  const wrap = document.getElementById('videoFrameWrap');
+  const ytId = extractYouTubeId(url);
+
+  if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
+
+  if (ytId) {
+    wrap.innerHTML = `<div id="ytMount" style="width:100%;height:100%"></div>`;
+    if (ytApiReady) {
+      ytPlayer = new YT.Player('ytMount', {
+        videoId: ytId,
+        playerVars: { autoplay: autoplay ? 1 : 0, playsinline: 1, rel: 0 },
+        events: {
+          onStateChange: (e) => { if (e.data === YT.PlayerState.ENDED) videoNext(); }
+        }
+      });
+    }
+  } else {
+    wrap.innerHTML = `<video id="directVideo" controls ${autoplay ? 'autoplay' : ''} playsinline src="${url}"></video>`;
+    const v = document.getElementById('directVideo');
+    v.addEventListener('ended', videoNext);
+  }
+  renderPlaylist();
+}
+
+function videoNext() { loadVideo(currentIdx + 1, true); }
+function videoPrev() { loadVideo(currentIdx - 1, true); }
+function videoTogglePlay() {
+  if (!playlist.length) return;
+  const directVid = document.getElementById('directVideo');
+  if (directVid) {
+    if (directVid.paused) directVid.play(); else directVid.pause();
+    return;
+  }
+  if (ytPlayer && ytPlayer.getPlayerState) {
+    const state = ytPlayer.getPlayerState();
+    if (state === 1) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+  } else if (playlist.length) {
+    loadVideo(currentIdx, true);
+  }
+}
+
+window.onYouTubeIframeAPIReady = function() {
+  ytApiReady = true;
+  if (playlist.length && extractYouTubeId(playlist[currentIdx])) loadVideo(currentIdx, false);
+};
+
+renderPlaylist();
+if (playlist.length && !extractYouTubeId(playlist[0])) loadVideo(0, false);
+
+// ══════════════════════ GHI CHÚ (localStorage) ══════════════════════
+const NOTE_KEY = 'nvqs_notes';
+const noteArea = document.getElementById('noteArea');
+const noteStatus = document.getElementById('noteStatus');
+noteArea.value = localStorage.getItem(NOTE_KEY) || '';
+if (noteArea.value) noteStatus.textContent = 'Đã lưu trước đó';
+
+let noteTimer = null;
+function saveNote(manual) {
+  localStorage.setItem(NOTE_KEY, noteArea.value);
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  noteStatus.textContent = (manual ? 'Đã lưu lúc ' : 'Tự động lưu lúc ') + `${hh}:${mm}`;
+}
+noteArea.addEventListener('input', () => {
+  clearTimeout(noteTimer);
+  noteStatus.textContent = 'Đang gõ...';
+  noteTimer = setTimeout(() => saveNote(false), 1200);
+});
+</script>
+</body>
+</html>
